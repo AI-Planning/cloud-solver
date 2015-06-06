@@ -16,7 +16,7 @@ This project should get you from zero to having your own hosted planner in the c
 5. Run `heroku create` from the directory this file exists. Take note of the URL.
 6. Run `git push heroku master` to deploy the software.
 
-Est voila! You now have your very own planner-in-the-cloud.
+Et voila! You now have your very own planner-in-the-cloud.
 
 
 Playing with things
