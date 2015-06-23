@@ -31,7 +31,7 @@ Most of the magic happens in web.js, routes.js, and process_solution.py. For exa
 
 Caveats
 -------
-* If you are behind a firewall or proxy, [these instructions](https://devcenter.heroku.com/articles/using-the-cli#using-an-http-proxy) might help with heroku.
+* If you are behind a firewall or proxy, [these instructions](https://devcenter.heroku.com/articles/using-the-cli#using-an-http-proxy) might help with heroku. Additionally, `heroku run` may need to change to `heroku run:detached` to get some commands working if your proxy / firewall is particularly restrictive.
 
 Warranty and Guarantees
 ----------------------
