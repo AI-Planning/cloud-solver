@@ -29,6 +29,10 @@ You can test things by running `heroku open` and then appending the appropriate 
 Most of the magic happens in web.js, routes.js, and process_solution.py. For example, the `app.solve` method in web.js is what invokes the planner, and you can modify the command line string used, the timeout, etc. If you want to run some other planner or type of software, `app.parsePlan` is the method that parses the output. It assumes that properly formatted JSON is sent to the standard output, and all you need to do is replace process_solution.py with your own script to parse any custom output of the planner / software.
 
 
+Caveats
+-------
+* If you are behind a firewall or proxy, [these instructions](https://devcenter.heroku.com/articles/using-the-cli#using-an-http-proxy) might help with heroku.
+
 Warranty and Guarantees
 ----------------------
 There are none. Have fun, play nice, and feel free to share any cool things you create.
