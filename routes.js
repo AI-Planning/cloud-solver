@@ -25,7 +25,7 @@ module.exports = function(app) {
 						toRet += "No plan found. Error:\n" + jsonResult['error'];
 					}
 					
-					toRet += "\nOutput:\n";
+					toRet += "\n\n\nOutput:\n";
 					toRet += jsonResult['output'];
 
 					res.end(toRet);
