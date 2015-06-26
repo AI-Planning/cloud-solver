@@ -68,7 +68,7 @@ app.readDomains = function(domdata, probdata, whendone) {
 }
 
 app.solve = function(dom, prob, plan, outfile, whendone) {
-    exec('./siw-then-bfsf --domain ' + dom + ' --problem ' + prob + ' --output ' + plan +
+    exec('./plan ' + dom + ' ' + prob + ' ' + plan +
          ' > ' + outfile + ' 2>&1; echo; echo Plan:; cat ' + plan,
          { timeout: 10000 }, function (error, stdout, stderr) {
 
