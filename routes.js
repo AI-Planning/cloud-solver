@@ -15,6 +15,7 @@ module.exports = function(app) {
 			app.fetchDomains(req.query.domain, req.query.problem, function (dom, prob, plan, newout) {
 				app.solve(dom, prob, plan, newout, function (result) {
 					res.setHeader('Content-Type', 'text/plain');
+					console.log(result);
 					var jsonResult = JSON.parse(result);
 					var toRet = '';
 					if (jsonResult['result'] !== 'err') {
