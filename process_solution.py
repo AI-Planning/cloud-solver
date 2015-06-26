@@ -26,7 +26,7 @@ def getActionDetails(task, plan, output):
                        'plan': actions,
                        'output': output}, indent=4)
 
-def getSimplePlan(task, plan, err_msg):
+def getSimplePlan(task, plan, err_msg, output):
     return json.dumps({'result': 'ok',
                        'type': 'simple',
                        'length': len(plan),
@@ -74,9 +74,9 @@ def doit(domain, problem, solution, outfile):
                            'error': "Failed to parse plan -- %s\n\n%s" % (str(e), solver_output)})
     
     try:
-        return getActionDetails(task, plan)
+        return getActionDetails(task, plan, solver_output)
     except Exception, e:
-        return getSimplePlan(task, plan, str(e))
+        return getSimplePlan(task, plan, str(e), solver_output)
 
 if __name__ == '__main__':
     
