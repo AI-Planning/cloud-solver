@@ -3,7 +3,7 @@ import sys, json, os
 
 from utils.parser import Problem
 
-def getActionDetails(task, plan):
+def getActionDetails(task, plan, output):
     actions = []
     act_map = {}
     
@@ -23,35 +23,39 @@ def getActionDetails(task, plan):
     return json.dumps({'result': 'ok',
                        'type': 'full',
                        'length': len(plan),
-                       'plan': actions}, indent=4)
+                       'plan': actions,
+                       'output': output}, indent=4)
 
 def getSimplePlan(task, plan, err_msg):
     return json.dumps({'result': 'ok',
                        'type': 'simple',
                        'length': len(plan),
                        'plan': plan,
-                       'error': err_msg}, indent=4)
+                       'error': err_msg,
+                       'output': output}, indent=4)
 
 def doit(domain, problem, solution, outfile):
+    
+    solver_output = None
     
     try:
         file = open(outfile, 'r')
         solver_output = file.read()
         file.close()
     except Exception, e:
-        return json.dumps({'result': 'err',
+        return json.dumps({'result': 'err', 'output': solver_output,
                            'error': "Failed to read solver output -- %s" % str(e)})
     
     try:
         task = Problem(domain, problem)
     except Exception, e:
-        return json.dumps({'result': 'err',
+        return json.dumps({'result': 'err', 'output': solver_output,
                            'error': "Failed to parse the problem -- %s\n\n%s" % (str(e), solver_output)})
     
     try:
         
         if not os.path.isfile(solution):
-            return json.dumps({'result': 'err',
+            return json.dumps({'result': 'err', 'output': solver_output,
                                'error': "Solver failed.\n\n%s" % solver_output})
         
         file = open(solution, 'r')
@@ -60,14 +64,13 @@ def doit(domain, problem, solution, outfile):
         
         if (len(plan) == 0) or (len(plan) == 1 and plan[0] == ''):
             err_str = "Suspected timeout.\n\n%s" % solver_output
-            return json.dumps({'result': 'err',
-                               'error': err_str})
+            return json.dumps({'result': 'err', 'output': solver_output, 'error': err_str})
         
         if '' == plan[-1]:
             plan = plan[:-1]
             
     except Exception, e:
-        return json.dumps({'result': 'err',
+        return json.dumps({'result': 'err', 'output': solver_output,
                            'error': "Failed to parse plan -- %s\n\n%s" % (str(e), solver_output)})
     
     try:
