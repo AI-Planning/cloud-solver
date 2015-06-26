@@ -84,6 +84,7 @@ app.solve = function(dom, prob, plan, outfile, whendone) {
 app.parsePlan = function(dom, prob, plan, outfile, whendone) {
     exec('python process_solution.py ' + dom + ' ' + prob + ' ' + plan + ' ' + outfile,
             { timeout: 5000 }, function (error, stdout, stderr) {
+        console.log(stdout);
         whendone(stdout);
     });
 };
