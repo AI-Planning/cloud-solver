@@ -1,0 +1,169 @@
+planningapi = function() {
+  var API_URL = "http://api.planning.domains";
+  var SOLVER_URL = "http://solver.planning.domains";
+  var TIMEOUT = 10000; // 10s
+
+  var collections;
+  var domains;
+  var problems;
+  var solving;
+
+  function progressbar_update(start, bar) {
+    var t = (new Date()).getTime() - start.getTime();
+    console.log(t);
+    var p = Math.round((t/TIMEOUT)*100);
+    console.log(p);
+    if(solving && p < 100) {
+      bar.css('width', p + "%");
+      bar.children('span').html(p + "%");
+      setTimeout(progressbar_update, 100, start, bar);
+    }
+  }
+
+  function progressbar_init() {
+    var progress_div = $("#solving .progress");
+    var bar = $("#solving .progress .progress-bar");
+    var btn = $("#solving .btn");
+
+    bar.removeClass();
+    bar.addClass("progress-bar progress-bar-success progress-bar-striped active");
+    bar.css("width", "0%");
+    progress_div.css('visibility', 'visible');
+
+    solving = true;
+    setTimeout(progressbar_update, 100, new Date(), bar);
+  }
+
+  function progressbar_error() {
+    var bar = $("#solving .progress .progress-bar");
+    solving = false;
+    bar.removeClass();
+    bar.addClass("progress-bar progress-bar-danger");
+    bar.css("width", "100%");
+  }
+
+  function progressbar_success() {
+    var bar = $("#solving .progress .progress-bar");
+    solving = false;
+    bar.removeClass();
+    bar.addClass("progress-bar progress-bar-success");
+    bar.css("width", "100%");
+  }
+
+  function solve() {
+    var prob_index = $("#problems option:selected").val();
+    var domain_text;
+    var pb_text;
+
+    $("#solution").html("");
+    progressbar_init();
+
+    $.ajax({
+      url: SOLVER_URL + "/solve",
+      type: "POST",
+      contentType: 'application/json',
+      data: JSON.stringify({"domain": problems[prob_index].dom_url,
+                            "problem": problems[prob_index].prob_url,
+                            "is_url": true
+                           })
+      }).done(function (res) {
+        if (res['result'] === 'ok') {
+          progressbar_success();
+
+          var items = [];
+          $.each(res.plan, function(index, val) {
+            items.push("<li>" + val.name + "</li>");
+          });
+          $("#solution").html("<ol>" + items.join("") + "</ol>");
+        } else {
+          progressbar_error();
+          $("#solution").html("<pre>" + res.error + "</pre>");
+        }
+      });
+
+    return false;
+  }
+
+  function collection_change() {
+    var col_index = $("#collections option:selected").val();
+
+    var sel_domains = null;
+    var description = "";
+    if(col_index >= 0) {
+      description = collections[col_index].description;
+      sel_domains = JSON.parse(collections[col_index].domain_set);
+    }
+    $("#col_desc").html(description);
+
+    var items = [];
+    $.each(domains, function(index, val) {
+      if(col_index < 0 || sel_domains.indexOf(val.id) > -1) {
+        items.push("<option value=" + index + ">" + val.dom_name + "</option>");
+      }
+    });
+    $("#domains").html(items.join(""));
+    console.log(items);
+    domain_change();
+  }
+
+  function domain_change() {
+    var dom_index = $("#domains option:selected").val();
+    $("#dom_desc").html(domains[dom_index].description);
+
+    $.getJSON(API_URL + "/problems/" + domains[dom_index].id, function(data) {
+      data.result.sort(function(a,b) { return a.prob_name.toLowerCase() > b.prob_name.toLowerCase(); })
+      problems = data.result;
+      var items = [];
+      $.each(problems, function(index, val) {
+        items.push("<option value = " + index + ">" + val.prob_name + "</option>");
+      });
+      $("#problems").html(items.join(""));
+      problem_change();
+    });
+  }
+
+  function problem_change() {
+    var prob_index = $("#problems option:selected").val();
+    var ub = problems[prob_index].upper_bound;
+    var lb = problems[prob_index].lower_bound;
+    $("#prob_desc").html(
+      "<ul>" +
+        "<li>Upper bound: " + (ub == null ? "unknown" : ub) + "</li>" +
+        "<li>Lower bound: " + (lb == null ? "unknown" : lb) + "</li>" +
+      "</ul>"
+    );
+  }
+
+  function _init() {
+    $.getJSON(API_URL + "/collections", function(data) {
+      data.result.sort(function(a,b) { return a.name.toLowerCase() > b.name.toLowerCase(); })
+      collections = data.result;
+      var items = ["<option value=\"-1\" selected>All domains</option>"];
+      $.each(collections, function(index, val) {
+        items.push("<option value = " + index + ">" + val.name + "</option>");
+      });
+      $("#collections").html(items.join(""));
+    });
+
+    $.getJSON(API_URL + "/domains", function(data) {
+      data.result.sort(function(a,b) { return a.dom_name.toLowerCase() > b.dom_name.toLowerCase(); })
+      domains = data.result;
+      var items = [];
+      $.each(domains, function(index, val) {
+        items.push("<option value=" + index + ">" + val.dom_name + "</option>");
+      });
+      $("#domains").html(items.join(""));
+      $("#collections").change(collection_change);
+      $("#domains").change(domain_change);
+      $("#problems").change(problem_change);
+      domain_change();
+    });
+
+    $("#solving .btn").click(solve);
+  }
+
+  return {
+    init : _init,
+  }
+}();
+

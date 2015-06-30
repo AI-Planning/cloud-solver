@@ -7,6 +7,10 @@ module.exports = function(app) {
 		res.render('index.ejs');
 	});
 
+  app.get('/list', function(req, res) {
+    res.render('list.ejs');
+  });
+
 	app.get('/solve', function(req, res) {
 		if ((typeof req.query.problem === 'undefined') || (typeof req.query.domain === 'undefined')) {
 			res.setHeader('Content-Type', 'text/plain');
@@ -24,7 +28,7 @@ module.exports = function(app) {
 					} else {
 						toRet += "No plan found. Error:\n" + jsonResult['error'];
 					}
-					
+
 					toRet += "\n\n\nOutput:\n";
 					toRet += jsonResult['output'];
 
@@ -41,7 +45,12 @@ module.exports = function(app) {
 			res.setHeader('Content-Type', 'application/json');
 			res.end(JSON.stringify({ result: 'err', error: "Must define domain and problem" }, null, 3));
 		} else {
-			app.readDomains(req.body.domain, req.body.problem, function (dom, prob, plan, outfile) {
+      var domainRetreiver = app.fetchDomains;
+      if(req.body.url === 'undefined' || req.body.is_url === false) {
+        domainRetreiver = app.readDomains
+      }
+
+			domainRetreiver(req.body.domain, req.body.problem, function (dom, prob, plan, outfile) {
 				app.solve(dom, prob, plan, outfile, function (result) {
 					res.setHeader('Content-Type', 'application/json');
 					res.end(result);
