@@ -82,7 +82,7 @@ planningapi = function() {
           items.push("<li>" + val.name + "</li>");
         });
         $("#solution").html("<ol>" + items.join("") + "</ol>");
-        $("#planner_output").html("<pre>" + res.output + "</pre>");
+        $("#planner_output").html("<pre>" + $('<div/>').text(res.output).html() + "</pre>");
 
       } else {
         progressbar_error();
