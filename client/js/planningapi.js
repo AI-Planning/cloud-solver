@@ -1,7 +1,7 @@
 planningapi = function() {
-  var API_URL = "http://api.planning.domains";
-  var SOLVER_URL = "http://solver.planning.domains";
-  var TIMEOUT = 10000; // 10s
+  var API_URL = "//api.planning.domains/";
+  var SOLVER_URL = "/";
+  var TIMEOUT = 12000; // 12s
 
   var collections;
   var domains;
@@ -10,9 +10,7 @@ planningapi = function() {
 
   function progressbar_update(start, bar) {
     var t = (new Date()).getTime() - start.getTime();
-    console.log(t);
     var p = Math.round((t/TIMEOUT)*100);
-    console.log(p);
     if(solving && p < 100) {
       bar.css('width', p + "%");
       bar.children('span').html(p + "%");
@@ -50,6 +48,14 @@ planningapi = function() {
     bar.css("width", "100%");
   }
 
+  function solve_enable() {
+    $("#solving .btn").prop('disabled', false);
+  }
+
+  function solve_disable() {
+    $("#solving .btn").prop('disabled', true);
+  }
+
   function solve() {
     var prob_index = $("#problems option:selected").val();
     var domain_text;
@@ -59,35 +65,40 @@ planningapi = function() {
     progressbar_init();
 
     $.ajax({
-      url: SOLVER_URL + "/solve",
-      type: "POST",
-      contentType: 'application/json',
-      data: JSON.stringify({"domain": problems[prob_index].dom_url,
-                            "problem": problems[prob_index].prob_url,
-                            "is_url": true
-                           })
-      }).done(function (res) {
-        if (res['result'] === 'ok') {
-          progressbar_success();
+      url         : SOLVER_URL + "solve",
+      type        : "POST",
+      contentType : 'application/json',
+      data        : JSON.stringify({"domain" : problems[prob_index].dom_url,
+                                   "problem": problems[prob_index].prob_url,
+                                   "is_url": true
+                    })
+    }).done(function (res) {
+      if (res['result'] === 'ok') {
+        progressbar_success();
 
-          var items = [];
-          $.each(res.plan, function(index, val) {
-            items.push("<li>" + val.name + "</li>");
-          });
-          $("#solution").html("<ol>" + items.join("") + "</ol>");
-        } else {
-          progressbar_error();
-          $("#solution").html("<pre>" + res.error + "</pre>");
-        }
-      });
+        var items = [];
+        $.each(res.plan, function(index, val) {
+          items.push("<li>" + val.name + "</li>");
+        });
+        $("#solution").html("<ol>" + items.join("") + "</ol><pre>" + res.output + "</pre>");
+      } else {
+        progressbar_error();
+        $("#solution").html("<pre>" + res.error + "</pre>");
+      }
+    }).fail(function (jqxhr, error) {
+      progressbar_error();
+      $("#solution").html("<pre>" + error + "</pre>");
+    });
 
     return false;
   }
 
   function collection_change() {
-    var col_index = $("#collections option:selected").val();
+    $("#domains").html();
 
+    var col_index = $("#collections option:selected").val();
     var sel_domains = null;
+
     var description = "";
     if(col_index >= 0) {
       description = collections[col_index].description;
@@ -98,19 +109,22 @@ planningapi = function() {
     var items = [];
     $.each(domains, function(index, val) {
       if(col_index < 0 || sel_domains.indexOf(val.id) > -1) {
-        items.push("<option value=" + index + ">" + val.dom_name + "</option>");
+        items.push("<option value=" + index + ">(" + val.id + ") " + val.dom_name + "</option>");
       }
     });
     $("#domains").html(items.join(""));
-    console.log(items);
+
     domain_change();
   }
 
   function domain_change() {
+    solve_disable();
+    $("#problems").html();
+
     var dom_index = $("#domains option:selected").val();
     $("#dom_desc").html(domains[dom_index].description);
 
-    $.getJSON(API_URL + "/problems/" + domains[dom_index].id, function(data) {
+    $.getJSON(API_URL + "problems/" + domains[dom_index].id, function(data) {
       data.result.sort(function(a,b) { return a.prob_name.toLowerCase() > b.prob_name.toLowerCase(); })
       problems = data.result;
       var items = [];
@@ -119,6 +133,7 @@ planningapi = function() {
       });
       $("#problems").html(items.join(""));
       problem_change();
+      solve_enable();
     });
   }
 
@@ -135,7 +150,7 @@ planningapi = function() {
   }
 
   function _init() {
-    $.getJSON(API_URL + "/collections", function(data) {
+    $.getJSON(API_URL + "collections", function(data) {
       data.result.sort(function(a,b) { return a.name.toLowerCase() > b.name.toLowerCase(); })
       collections = data.result;
       var items = ["<option value=\"-1\" selected>All domains</option>"];
@@ -145,12 +160,12 @@ planningapi = function() {
       $("#collections").html(items.join(""));
     });
 
-    $.getJSON(API_URL + "/domains", function(data) {
+    $.getJSON(API_URL + "domains", function(data) {
       data.result.sort(function(a,b) { return a.dom_name.toLowerCase() > b.dom_name.toLowerCase(); })
       domains = data.result;
       var items = [];
       $.each(domains, function(index, val) {
-        items.push("<option value=" + index + ">" + val.dom_name + "</option>");
+        items.push("<option value=" + index + ">(" + val.id + ") " + val.dom_name + "</option>");
       });
       $("#domains").html(items.join(""));
       $("#collections").change(collection_change);
