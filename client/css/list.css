@@ -3,6 +3,7 @@
   background-color: #333333;
   font-size: 1.3em;
   color: white;
+  margin-bottom: 20px;
 }
 
 #api_selector a {
@@ -37,6 +38,3 @@
   visibility: hidden;
 }
 
-#solution {
-   margin-top: 20px;
-}

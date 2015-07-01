@@ -62,6 +62,7 @@ planningapi = function() {
     var pb_text;
 
     $("#solution").html("");
+    $("#planner_output").html("");
     progressbar_init();
 
     $.ajax({
@@ -80,21 +81,23 @@ planningapi = function() {
         $.each(res.plan, function(index, val) {
           items.push("<li>" + val.name + "</li>");
         });
-        $("#solution").html("<ol>" + items.join("") + "</ol><pre>" + res.output + "</pre>");
+        $("#solution").html("<ol>" + items.join("") + "</ol>");
+        $("#planner_output").html("<pre>" + res.output + "</pre>");
+
       } else {
         progressbar_error();
-        $("#solution").html("<pre>" + res.error + "</pre>");
+        $("#planner_output").html("<pre>" + res.error + "</pre>");
       }
     }).fail(function (jqxhr, error) {
       progressbar_error();
-      $("#solution").html("<pre>" + error + "</pre>");
+      $("#planner_output").html("<pre>" + error + "</pre>");
     });
 
     return false;
   }
 
   function collection_change() {
-    $("#domains").html();
+    $("#domains").html("");
 
     var col_index = $("#collections option:selected").val();
     var sel_domains = null;
@@ -119,7 +122,7 @@ planningapi = function() {
 
   function domain_change() {
     solve_disable();
-    $("#problems").html();
+    $("#problems").html("");
 
     var dom_index = $("#domains option:selected").val();
     $("#dom_desc").html(domains[dom_index].description);
