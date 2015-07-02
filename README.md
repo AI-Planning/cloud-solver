@@ -38,3 +38,8 @@ Caveats
 Warranty and Guarantees
 ----------------------
 There are none. Have fun, play nice, and feel free to share any cool things you create.
+
+Contributors
+------------
+* [Christian Muise](http://www.haz.ca/)
+* [Simon Vernhes](https://vernhes.eu/)
