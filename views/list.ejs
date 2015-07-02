@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Planning Domains API</title>
+    <link href='//fonts.googleapis.com/css?family=Vollkorn:400italic,400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/list.css">
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="js/planningapi.js"></script>
+  </head>
+  <body>
+    <div id="api_selector">
+      <div class="row">
+        <div class="col-xs-2 col-md-1">Collection</div>
+        <div class="col-xs-4 col-md-2"><select name="collections" id="collections" class="form-control"></select></div>
+        <div class="col-xs-6 ccol-md-9" id="col_desc"></div>
+      </div>
+      <div class="row">
+        <div class="col-xs-2 col-md-1">Domain</div>
+        <div class="col-xs-4 col-md-2"><select name="domains" id="domains" class="form-control"></select></div>
+        <div class="col-xs-6 col-md-9" id="dom_desc"></div>
+      </div>
+      <div class="row">
+        <div class="col-xs-2 col-md-1">Problem</div>
+        <div class="col-xs-4 col-md-2"><select name="problems" id="problems" class="form-control"></select></div>
+        <div class="col-xs-6 col-md-9" id="prob_desc"></div>
+      </div>
+      <div id="solving" class="row">
+        <div class="col-xs-6 col-md-3 progress">
+          <div class="progress-bar" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">
+            <span class="sr-only"></span>
+          </div>
+        </div>
+        <div class="col-xs-6 col-md-9"><button class="btn btn-success" type="submit" value="Submit" class="button">Solve</button></div>
+      </div>
+    </div>
+    <div class="row">
+      <div id="planner_output" class="col-md-6"></div>
+      <div id="solution" class="col-md-6"></div>
+    </div>
+    <script>
+planningapi.init();
+    </script>
+  </body>
+</html>
