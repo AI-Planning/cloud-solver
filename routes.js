@@ -45,7 +45,7 @@ module.exports = function(app) {
       res.end(JSON.stringify({ result: 'err', error: "Must define domain and problem" }, null, 3));
     } else {
       var domainRetriever = app.fetchDomains;
-      if(typeof req.body.url === 'undefined' || req.body.is_url === false) {
+      if(typeof req.body.is_url === 'undefined' || req.body.is_url === false) {
         domainRetriever = app.readDomains
       }
 
