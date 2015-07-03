@@ -44,12 +44,12 @@ module.exports = function(app) {
       res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify({ result: 'err', error: "Must define domain and problem" }, null, 3));
     } else {
-      var domainRetreiver = app.fetchDomains;
-      if(req.body.url === 'undefined' || req.body.is_url === false) {
-        domainRetreiver = app.readDomains
+      var domainRetriever = app.fetchDomains;
+      if(typeof req.body.url === 'undefined' || req.body.is_url === false) {
+        domainRetriever = app.readDomains
       }
 
-      domainRetreiver(req.body.domain, req.body.problem, function (dom, prob, plan, outfile) {
+      domainRetriever(req.body.domain, req.body.problem, function (dom, prob, plan, outfile) {
         app.solve(dom, prob, plan, outfile, function (result) {
           res.setHeader('Content-Type', 'application/json');
           res.end(result);
