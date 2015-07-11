@@ -112,7 +112,7 @@ planningapi = function() {
     var items = [];
     $.each(domains, function(index, val) {
       if(col_index < 0 || sel_domains.indexOf(val.id) > -1) {
-        items.push("<option value=" + index + ">(" + val.id + ") " + val.dom_name + "</option>");
+        items.push("<option value=" + index + ">(" + val.id + ") " + val.domain_name + "</option>");
       }
     });
     $("#domains").html(items.join(""));
@@ -164,11 +164,11 @@ planningapi = function() {
     });
 
     $.getJSON(API_URL + "domains", function(data) {
-      data.result.sort(function(a,b) { return a.dom_name.toLowerCase() > b.dom_name.toLowerCase(); })
+      data.result.sort(function(a,b) { return a.domain_name.toLowerCase() > b.domain_name.toLowerCase(); })
       domains = data.result;
       var items = [];
       $.each(domains, function(index, val) {
-        items.push("<option value=" + index + ">(" + val.id + ") " + val.dom_name + "</option>");
+        items.push("<option value=" + index + ">(" + val.id + ") " + val.domain_name + "</option>");
       });
       $("#domains").html(items.join(""));
       $("#collections").change(collection_change);
