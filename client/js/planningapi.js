@@ -69,8 +69,8 @@ planningapi = function() {
       url         : SOLVER_URL + "solve",
       type        : "POST",
       contentType : 'application/json',
-      data        : JSON.stringify({"domain" : problems[prob_index].dom_url,
-                                   "problem": problems[prob_index].prob_url,
+      data        : JSON.stringify({"domain" : problems[prob_index].domain_url,
+                                   "problem": problems[prob_index].problem_url,
                                    "is_url": true
                     })
     }).done(function (res) {
@@ -111,8 +111,8 @@ planningapi = function() {
 
     var items = [];
     $.each(domains, function(index, val) {
-      if(col_index < 0 || sel_domains.indexOf(val.id) > -1) {
-        items.push("<option value=" + index + ">(" + val.id + ") " + val.domain_name + "</option>");
+      if(col_index < 0 || sel_domains.indexOf(val.domain_id) > -1) {
+        items.push("<option value=" + index + ">(" + val.domain_id + ") " + val.domain_name + "</option>");
       }
     });
     $("#domains").html(items.join(""));
@@ -127,12 +127,12 @@ planningapi = function() {
     var dom_index = $("#domains option:selected").val();
     $("#dom_desc").html(domains[dom_index].description);
 
-    $.getJSON(API_URL + "problems/" + domains[dom_index].id, function(data) {
-      data.result.sort(function(a,b) { return a.prob_name.toLowerCase() > b.prob_name.toLowerCase(); })
+    $.getJSON(API_URL + "problems/" + domains[dom_index].domain_id, function(data) {
+      data.result.sort(function(a,b) { return a.problem.toLowerCase() > b.problem.toLowerCase(); })
       problems = data.result;
       var items = [];
       $.each(problems, function(index, val) {
-        items.push("<option value = " + index + ">" + val.prob_name + "</option>");
+        items.push("<option value = " + index + ">" + val.problem + "</option>");
       });
       $("#problems").html(items.join(""));
       problem_change();
@@ -154,11 +154,11 @@ planningapi = function() {
 
   function _init() {
     $.getJSON(API_URL + "collections", function(data) {
-      data.result.sort(function(a,b) { return a.name.toLowerCase() > b.name.toLowerCase(); })
+      data.result.sort(function(a,b) { return a.collection_name.toLowerCase() > b.collection_name.toLowerCase(); })
       collections = data.result;
       var items = ["<option value=\"-1\" selected>All domains</option>"];
       $.each(collections, function(index, val) {
-        items.push("<option value = " + index + ">" + val.name + "</option>");
+        items.push("<option value = " + index + ">" + val.collection_name + "</option>");
       });
       $("#collections").html(items.join(""));
     });
@@ -168,7 +168,7 @@ planningapi = function() {
       domains = data.result;
       var items = [];
       $.each(domains, function(index, val) {
-        items.push("<option value=" + index + ">(" + val.id + ") " + val.domain_name + "</option>");
+        items.push("<option value=" + index + ">(" + val.domain_name + ") " + val.domain_name + "</option>");
       });
       $("#domains").html(items.join(""));
       $("#collections").change(collection_change);
