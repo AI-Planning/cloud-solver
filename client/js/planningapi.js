@@ -1,5 +1,5 @@
 planningapi = function() {
-  var API_URL = "//api.planning.domains/";
+  var API_URL = "//api.planning.domains/json/classical/";
   var SOLVER_URL = "/";
   var TIMEOUT = 12000; // 12s
 
