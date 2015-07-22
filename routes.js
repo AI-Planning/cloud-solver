@@ -11,50 +11,67 @@ module.exports = function(app) {
   });
 
   app.get('/solve', function(req, res) {
-    if ((typeof req.query.problem === 'undefined') || (typeof req.query.domain === 'undefined')) {
-      res.setHeader('Content-Type', 'text/plain');
-      res.end("Error: Must define domain and problem");
-    } else {
-      app.fetchDomains(req.query.domain, req.query.problem, function (dom, prob, plan, newout) {
-        app.solve(dom, prob, plan, newout, function (result) {
-          res.setHeader('Content-Type', 'text/plain');
-          var jsonResult = JSON.parse(result);
-          var toRet = '';
-          if (jsonResult['result'] !== 'err') {
-            toRet += "Plan Found:\n  ";
-            for (var i = 0; i < jsonResult['plan'].length; i++)
-              toRet += "\n  " + jsonResult['plan'][i]['name'];
-          } else {
-            toRet += "No plan found. Error:\n" + jsonResult['error'];
-          }
+    res.setHeader('Content-Type', 'text/plain');
 
-          toRet += "\n\n\nOutput:\n";
-          toRet += jsonResult['output'];
+    app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
+      function(error, dom, prob, plan, outfile) {
+        var cleanUpAndRespond = function(result) {
+          app.cleanUp([dom, prob, plan], function() {
+            if (error != null) {
+              var jsonResult = JSON.parse(result);
+              var toRet = '';
+              if (jsonResult['result'] !== 'err') {
+                toRet += "Plan Found:\n  ";
+                for (var i = 0; i < jsonResult['plan'].length; i++)
+                  toRet += "\n  " + jsonResult['plan'][i]['name'];
+              } else {
+                toRet += "No plan found. Error:\n" + jsonResult['error'];
+              }
 
-          res.end(toRet);
+              toRet += "\n\n\nOutput:\n";
+              toRet += jsonResult['output'];
 
-        });
+              res.end(toRet);
+            } else {
+              res.end("Error: " + error);
+            }
+          })
+        };
+        app.solve(dom, prob, plan, outfile, cleanUpAndRespond);
       });
-    }
   });
 
   app.post('/solve', function(req, res) {
     res.setHeader('Access-Control-Allow-Origin','*');
-    if ((typeof req.body.problem === 'undefined') || (typeof req.body.domain === 'undefined')) {
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ result: 'err', error: "Must define domain and problem" }, null, 3));
-    } else {
-      var domainRetriever = app.fetchDomains;
-      if(typeof req.body.is_url === 'undefined' || req.body.is_url === false) {
-        domainRetriever = app.readDomains
-      }
+    res.setHeader('Content-Type', 'application/json');
 
-      domainRetriever(req.body.domain, req.body.problem, function (dom, prob, plan, outfile) {
-        app.solve(dom, prob, plan, outfile, function (result) {
-          res.setHeader('Content-Type', 'application/json');
-          res.end(result);
-        });
+    app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
+      function(error, dom, prob, plan, newout) {
+        var cleanUpAndRespond = function(result) {
+          app.cleanUp([dom, prob, plan], function() {
+            if (error != null) {
+              res.end(error);
+            } else {
+              res.end(result);
+            }
+          })
+        };
+        app.solve(dom, prob, plan, outfile, cleanUpAndRespond);
       });
-    }
   });
+
+  app.post('/validate', function(req, res) {
+    res.setHeader('Access-Control-Allow-Origin','*');
+    res.setHeader('Content-Type', 'application/json');
+    app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
+      function(dom, prob, plan, newout) {
+        var cleanUpAndRespond = function(result) {
+          app.cleanUp([dom, prob, plan], function() {
+            res.end(result);
+          })
+        };
+        app.validate(dom, prob, req.query.plan, cleanUpAndRespond);
+      });
+  });
+
 };
