@@ -14,30 +14,39 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'text/plain');
 
     app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
-      function(error, dom, prob, plan, outfile) {
-        var cleanUpAndRespond = function(result) {
-          app.cleanUp([dom, prob, plan], function() {
-            if (error != null) {
-              var jsonResult = JSON.parse(result);
+      function(domerr, domres) {
+
+        if (error)
+          res.end("Error: " + domerr);
+
+        else {
+          var cleanUpAndRespond = function(error, result) {
+
+            app.cleanUp([domres.domain, domres.problem, domres.plan, domres.outfile], function() {
+
               var toRet = '';
-              if (jsonResult['result'] !== 'err') {
-                toRet += "Plan Found:\n  ";
-                for (var i = 0; i < jsonResult['plan'].length; i++)
-                  toRet += "\n  " + jsonResult['plan'][i]['name'];
-              } else {
+              if (error)
                 toRet += "No plan found. Error:\n" + jsonResult['error'];
+              else {
+                if (result['result'] !== 'err') {
+                  toRet += "Plan Found:\n  ";
+                  for (var i = 0; i < result['plan'].length; i++)
+                    toRet += "\n  " + result['plan'][i]['name'];
+                }
               }
 
               toRet += "\n\n\nOutput:\n";
-              toRet += jsonResult['output'];
+              toRet += result['output'];
 
               res.end(toRet);
-            } else {
-              res.end("Error: " + error);
-            }
-          })
-        };
-        app.solve(dom, prob, plan, outfile, cleanUpAndRespond);
+
+            });
+
+          };
+        }
+
+        app.solve(domres.domain, domres.problem, domres.plan, domres.outfile, cleanUpAndRespond);
+
       });
   });
 
@@ -46,17 +55,16 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'application/json');
 
     app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
-      function(error, dom, prob, plan, newout) {
-        var cleanUpAndRespond = function(result) {
-          app.cleanUp([dom, prob, plan], function() {
-            if (error != null) {
+      function(domerr, domres) {
+        var cleanUpAndRespond = function(error, result) {
+          app.cleanUp([domres.domain, domres.problem, domres.plan, domres.outfile], function() {
+            if (error)
               res.end(error);
-            } else {
+            else
               res.end(result);
-            }
-          })
+          });
         };
-        app.solve(dom, prob, plan, outfile, cleanUpAndRespond);
+        app.solve(domres.domain, domres.problem, domres.plan, domres.outfile, cleanUpAndRespond);
       });
   });
 
@@ -64,13 +72,16 @@ module.exports = function(app) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
     app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
-      function(dom, prob, plan, newout) {
-        var cleanUpAndRespond = function(result) {
-          app.cleanUp([dom, prob, plan], function() {
-            res.end(result);
-          })
+      function(domerr, domres) {
+        var cleanUpAndRespond = function(error, result) {
+          app.cleanUp([domres.domain, domres.problem, domres.plan], function() {
+            if (error)
+              res.end(error);
+            else
+              res.end(result);
+          });
         };
-        app.validate(dom, prob, req.query.plan, cleanUpAndRespond);
+        app.validate(domres.domain, domres.problem, req.query.plan, cleanUpAndRespond);
       });
   });
 

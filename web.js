@@ -49,7 +49,7 @@ app.fetchDomains = function(domainLoc, problemLoc, whendone) {
   var newOut = 'testing/output.' + rand;
   download(domainLoc, newDom, function() {
     download(problemLoc, newProb, function () {
-      whendone(null, newDom, newProb, newPlan, newOut);
+      whendone(null, {'domain':newDom, 'problem':newProb, 'plan':newPlan, 'outfile':newOut});
     });
   });
 };
@@ -62,7 +62,7 @@ app.readDomains = function(domdata, probdata, whendone) {
   var newOut = 'testing/output.' + rand;
   fs.writeFile(newDom, domdata.split('\\n').join('\n').split('\\t').join('\t'), function() {
     fs.writeFile(newProb, probdata.split('\\n').join('\n').split('\\t').join('\t'), function () {
-      whendone(null, newDom, newProb, newPlan, newOut);
+      whendone(null, {'domain':newDom, 'problem':newProb, 'plan':newPlan, 'outfile':newOut});
     });
   });
 }
@@ -97,16 +97,15 @@ app.getDomains = function(probID, problem, domain, is_url, whendone) {
 app.solve = function(dom, prob, plan, outfile, whendone) {
   exec('./plan ' + dom + ' ' + prob + ' ' + plan +
        ' > ' + outfile + ' 2>&1; echo; echo Plan:; cat ' + plan,
-  { timeout: 10000 }, function (error, stdout, stderr) {
-
-    app.parsePlan(dom, prob, plan, outfile, whendone);
+       { timeout: 10000 }, function (error, stdout, stderr) {
+         app.parsePlan(dom, prob, plan, outfile, whendone);
   });
 };
 
 app.parsePlan = function(dom, prob, plan, outfile, whendone) {
   exec('python process_solution.py ' + dom + ' ' + prob + ' ' + plan + ' ' + outfile,
        { timeout: 5000 }, function (error, stdout, stderr) {
-         whendone(stdout);
+         whendone(error, JSON.parse(stdout));
   });
 };
 
@@ -126,30 +125,35 @@ app.validate = function(dom, prob, plan, whendone) {
 };
 
 app.failValidate = function(dom, prob, plan, whendone) {
-  exec('./validate -e ' + dom + ' ' + prob + ' ' + plan,
-    { timeout: 10000 }, function (error, stdout, stderr) {
-    var response = JSON.stringify({
-      'result': 'err',
-      'error': 'Plan is invalid.',
-      'val_stdout': stdout,
-      'val_stderr': stderr
-    }, null, 3);
-    whendone(response);
-  });
+  exec('./validate -e ' + dom + ' ' + prob + ' ' + plan, { timeout: 10000 },
+    function (error, stdout, stderr) {
+      var response = JSON.stringify({
+        'result': 'err',
+        'error': 'Plan is invalid.',
+        'val_stdout': stdout,
+        'val_stderr': stderr
+      }, null, 3);
+      whendone(error, response);
+    }
+  );
 }
 
 app.failUnexpected = function(message, whendone) {
   var response = JSON.stringify({'result': 'err', 'error': message}, null, 3);
-  whendone(response);
+  whendone(null, response);
 }
 
 app.succeedValidate = function(cost, whendone) {
   var response = JSON.stringify({'result': 'valid', 'error': false, 'cost': cost}, null, 3);
-  whendone(response);
+  whendone(null, response);
 }
 
 app.cleanUp = function(filenames, whendone) {
-  exec('rm -f ' + filenames.join(" "), whendone);
+  exec('rm -f ' + filenames.join(" "),
+    function (err, stdout, stderr) {
+      whendone(err, {'rm_stdout':stdout, 'rm_stderr':stderr});
+    }
+  );
 }
 
 
