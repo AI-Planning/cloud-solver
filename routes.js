@@ -13,7 +13,7 @@ module.exports = function(app) {
   app.get('/solve', function(req, res) {
     res.setHeader('Content-Type', 'text/plain');
 
-    app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
+    app.getDomains(req.query.probID, req.query.problem, req.query.domain, true,
       function(domerr, domres) {
       
         console.log(JSON.stringify(domres, null, 3));
