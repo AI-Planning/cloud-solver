@@ -15,24 +15,27 @@ module.exports = function(app) {
 
     app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
       function(domerr, domres) {
+      
+        console.log(JSON.stringify(domres, null, 3));
 
         if (domerr)
           res.end("Error: " + domerr);
 
         else {
           var cleanUpAndRespond = function(error, result) {
+          
+            console.log(JSON.stringify(error, null, 3));
+            console.log(JSON.stringify(result, null, 3));
 
             app.cleanUp([domres.domain, domres.problem, domres.plan, domres.outfile], function() {
 
               var toRet = '';
-              if (error)
-                toRet += "No plan found. Error:\n" + jsonResult['error'];
+              if (error || (result['result'] === 'err'))
+                toRet += "No plan found. Error:\n" + result['error'];
               else {
-                if (result['result'] !== 'err') {
-                  toRet += "Plan Found:\n  ";
-                  for (var i = 0; i < result['plan'].length; i++)
-                    toRet += "\n  " + result['plan'][i]['name'];
-                }
+                toRet += "Plan Found:\n  ";
+                for (var i = 0; i < result['plan'].length; i++)
+                  toRet += "\n  " + result['plan'][i]['name'];
               }
 
               toRet += "\n\n\nOutput:\n";
