@@ -16,7 +16,7 @@ module.exports = function(app) {
     app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
       function(domerr, domres) {
 
-        if (error)
+        if (domerr)
           res.end("Error: " + domerr);
 
         else {
@@ -43,10 +43,10 @@ module.exports = function(app) {
             });
 
           };
+
+          app.solve(domres.domain, domres.problem, domres.plan, domres.outfile, cleanUpAndRespond);
+
         }
-
-        app.solve(domres.domain, domres.problem, domres.plan, domres.outfile, cleanUpAndRespond);
-
       });
   });
 
