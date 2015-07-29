@@ -55,6 +55,7 @@ app.fetchDomains = function(domainLoc, problemLoc, whendone) {
 };
 
 app.readDomains = function(domdata, probdata, whendone) {
+  console.log("Reading domain:\n" + domdata);
   var rand = new Date().getTime();
   var newDom = 'testing/domain.' + rand + '.pddl';
   var newProb = 'testing/prob.' + rand + '.pddl';
