@@ -127,25 +127,23 @@ app.validate = function(dom, prob, plan, whendone) {
 app.failValidate = function(dom, prob, plan, whendone) {
   exec('./validate -e ' + dom + ' ' + prob + ' ' + plan, { timeout: 10000 },
     function (error, stdout, stderr) {
-      var response = JSON.stringify({
+      var response = {
         'result': 'err',
         'error': 'Plan is invalid.',
         'val_stdout': stdout,
         'val_stderr': stderr
-      }, null, 3);
+      };
       whendone(error, response);
     }
   );
 }
 
 app.failUnexpected = function(message, whendone) {
-  var response = JSON.stringify({'result': 'err', 'error': message}, null, 3);
-  whendone(null, response);
+  whendone(null, {'result': 'err', 'error': message});
 }
 
 app.succeedValidate = function(cost, whendone) {
-  var response = JSON.stringify({'result': 'valid', 'error': false, 'cost': cost}, null, 3);
-  whendone(null, response);
+  whendone(null, {'result': 'valid', 'error': false, 'cost': cost});
 }
 
 app.cleanUp = function(filenames, whendone) {

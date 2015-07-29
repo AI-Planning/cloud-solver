@@ -59,9 +59,9 @@ module.exports = function(app) {
           console.log(JSON.stringify(result, null, 3));
           app.cleanUp([domres.domain, domres.problem, domres.plan, domres.outfile], function() {
             if (error)
-              res.end(error);
+              res.end(JSON.stringify(error, null, 3));
             else
-              res.end(result);
+              res.end(JSON.stringify(result, null, 3));
           });
         };
         app.solve(domres.domain, domres.problem, domres.plan, domres.outfile, cleanUpAndRespond);
@@ -76,9 +76,9 @@ module.exports = function(app) {
         var cleanUpAndRespond = function(error, result) {
           app.cleanUp([domres.domain, domres.problem, domres.plan], function() {
             if (error)
-              res.end(error);
+              res.end(JSON.stringify(error, null, 3));
             else
-              res.end(result);
+              res.end(JSON.stringify(result, null, 3));
           });
         };
         app.validate(domres.domain, domres.problem, req.query.plan, cleanUpAndRespond);
