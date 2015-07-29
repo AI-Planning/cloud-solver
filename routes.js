@@ -52,7 +52,7 @@ module.exports = function(app) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
 
-    app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
+    app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url,
       function(domerr, domres) {
         var cleanUpAndRespond = function(error, result) {
           app.cleanUp([domres.domain, domres.problem, domres.plan, domres.outfile], function() {
@@ -69,7 +69,7 @@ module.exports = function(app) {
   app.post('/validate', function(req, res) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
-    app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
+    app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url,
       function(domerr, domres) {
         var cleanUpAndRespond = function(error, result) {
           app.cleanUp([domres.domain, domres.problem, domres.plan], function() {
@@ -79,7 +79,7 @@ module.exports = function(app) {
               res.end(JSON.stringify(result, null, 3));
           });
         };
-        app.validate(domres.domain, domres.problem, req.query.plan, cleanUpAndRespond);
+        app.validate(domres.domain, domres.problem, req.body.plan, cleanUpAndRespond);
       });
   });
 
