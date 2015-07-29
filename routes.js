@@ -15,17 +15,12 @@ module.exports = function(app) {
 
     app.getDomains(req.query.probID, req.query.problem, req.query.domain, true,
       function(domerr, domres) {
-      
-        console.log(JSON.stringify(domres, null, 3));
 
         if (domerr)
           res.end("Error: " + domerr);
 
         else {
           var cleanUpAndRespond = function(error, result) {
-          
-            console.log(JSON.stringify(error, null, 3));
-            console.log(JSON.stringify(result, null, 3));
 
             app.cleanUp([domres.domain, domres.problem, domres.plan, domres.outfile], function() {
 
@@ -60,6 +55,8 @@ module.exports = function(app) {
     app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.query.is_url,
       function(domerr, domres) {
         var cleanUpAndRespond = function(error, result) {
+          console.log(JSON.stringify(error, null, 3));
+          console.log(JSON.stringify(result, null, 3));
           app.cleanUp([domres.domain, domres.problem, domres.plan, domres.outfile], function() {
             if (error)
               res.end(error);
