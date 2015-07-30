@@ -1,5 +1,7 @@
-
 // app/routes.js
+
+var tmp = require('tmp');
+
 module.exports = function(app) {
 
   app.get('/', function(req, res) {
@@ -13,74 +15,131 @@ module.exports = function(app) {
   app.get('/solve', function(req, res) {
     res.setHeader('Content-Type', 'text/plain');
 
-    app.getDomains(req.query.probID, req.query.problem, req.query.domain, true,
-      function(domerr, domres) {
-
-        if (domerr)
-          res.end("Error: " + domerr);
-
-        else {
-          var cleanUpAndRespond = function(error, result) {
-
-            app.cleanUp([domres.domain, domres.problem, domres.plan, domres.outfile], function() {
-
-              var toRet = '';
-              if (error || (result['result'] === 'err'))
-                toRet += "No plan found. Error:\n" + result['error'];
-              else {
-                toRet += "Plan Found:\n  ";
-                for (var i = 0; i < result['plan'].length; i++)
-                  toRet += "\n  " + result['plan'][i]['name'];
-              }
-
-              toRet += "\n\n\nOutput:\n";
-              toRet += result['output'];
-
-              res.end(toRet);
-
-            });
-
-          };
-
-          app.solve(domres.domain, domres.problem, domres.plan, domres.outfile, cleanUpAndRespond);
-
+    tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
+    function _tempDirCreated(dirErr, path, cleanupCallback) {
+      var cleanupAndRespond = function(error, result) {
+        if (error) {
+          res.end(app.errorToText(error))
+        } else {
+          res.end(app.resultToText(result));
         }
-      });
+        cleanupCallback();
+      };
+      if (dirErr) {
+        cleanupAndRespond(dirErr, null);
+      } else {
+        app.getDomains(req.query.probID, req.query.problem, req.query.domain, true, path,
+        function _domainsRetrieved(domErr, domRes) {
+          if (domErr) {
+            cleanupAndRespond(domErr, null);
+          } else {
+            app.solve(domRes.domainPath, domRes.problemPath, path, cleanupAndRespond);
+          }
+        });
+      }
+    });
   });
 
   app.post('/solve', function(req, res) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
 
-    app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url,
-      function(domerr, domres) {
-        var cleanUpAndRespond = function(error, result) {
-          app.cleanUp([domres.domain, domres.problem, domres.plan, domres.outfile], function() {
-            if (error)
-              res.end(JSON.stringify(error, null, 3));
-            else
-              res.end(JSON.stringify(result, null, 3));
-          });
-        };
-        app.solve(domres.domain, domres.problem, domres.plan, domres.outfile, cleanUpAndRespond);
-      });
+    tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
+    function _tempDirCreated(dirErr, path, cleanupCallback) {
+      var cleanupAndRespond = function(error, result) {
+        var message = error || result;
+        res.end(JSON.stringify(message, null, 3))
+        cleanupCallback();
+      };
+      if (dirErr) {
+        cleanupAndRespond(dirErr, null);
+      } else {
+        app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.body.is_url, path,
+        function _domainsRetrieved(domErr, domRes) {
+          if (domErr) {
+            cleanupAndRespond(domErr, null);
+          } else {
+            app.solve(domRes.domainPath, domRes.problemPath, path, cleanupAndRespond);
+          }
+        });
+      }
+    });
   });
 
   app.post('/validate', function(req, res) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
-    app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url,
-      function(domerr, domres) {
-        var cleanUpAndRespond = function(error, result) {
-          app.cleanUp([domres.domain, domres.problem, domres.plan], function() {
-            if (error)
-              res.end(JSON.stringify(error, null, 3));
-            else
-              res.end(JSON.stringify(result, null, 3));
-          });
-        };
-        app.validate(domres.domain, domres.problem, req.body.plan, cleanUpAndRespond);
-      });
+
+    tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
+    function _tempDirCreated(dirErr, path, cleanupCallback) {
+      var cleanupAndRespond = function(error, result) {
+        var message = error || result;
+        res.end(JSON.stringify(message, null, 3))
+        cleanupCallback();
+      };
+      if (dirErr) {
+        cleanupAndRespond(dirErr, null);
+      } else {
+        app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.body.is_url, path,
+        function _domainsRetrieved(domErr, domRes) {
+          if (domErr) {
+            cleanupAndRespond(domErr, null);
+          } else {
+            var planPath = path + '/plan';
+            app.storeFile(planPath, req.body.plan,
+            function _planStored(planErr, planRes) {
+              if (planErr) {
+                cleanupAndRespond(planErr, null);
+              } else {
+                app.validate(domres.domainPath, domres.problemPath, planPath, path, cleanupAndRespond);
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  app.post('/solve-and-validate', function(req, res) {
+    res.setHeader('Access-Control-Allow-Origin','*');
+    res.setHeader('Content-Type', 'application/json');
+
+    tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
+    function _tempDirCreated(dirErr, path, cleanupCallback) {
+      var cleanupAndRespond = function(error, result) {
+        var message = error || result;
+        res.end(JSON.stringify(message, null, 3))
+        cleanupCallback();
+      };
+      if (dirErr) {
+        cleanupAndRespond(dirErr, null);
+      } else {
+        app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.body.is_url, path,
+        function _domainsRetrieved(domErr, domRes) {
+          if (domErr) {
+            cleanupAndRespond(domErr, null);
+          } else {
+            app.solve(domainPath, problemPath, path,
+            function _solved(solveErr, solveRes) {
+              if (solveErr) {
+                cleanupAndRespond(solveErr, null);
+              } else {
+                app.validate(domres.domainPath, domres.problemPath, solveRes.planPath, path,
+                function _validated(valErr, valRes) {
+                  if (valErr) {
+                    cleanupAndRespond(valErr, null);
+                  } else {
+                    var response = solveRes;
+                    response.update(valRes);
+                    cleanupAndRespond(null, response);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
   });
 
 };

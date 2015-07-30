@@ -31,7 +31,8 @@ app.use(cookieParser('I am a banana!'));
 
 var download = function(url, dest, cb) {
   var file = fs.createWriteStream(dest);
-  http.get(url, function(response) {
+  http.get(url,
+  function _handleResponse(response) {
     response.pipe(file);
     file.on('finish', function() {
       file.close(cb);
@@ -39,121 +40,156 @@ var download = function(url, dest, cb) {
   });
 };
 
+app.storeFile = function(content, path, whendone) {
+  fs.writeFile(path, content.split('\\n').join('\n').split('\\t').join('\t'),
+  function _fileWritten() {
+    whendone(null, {'path': path});
+  });
+};
+
 
 // The magic sauce
-app.fetchDomains = function(domainLoc, problemLoc, whendone) {
-  var rand = new Date().getTime();
-  var newDom = 'testing/domain.' + rand + '.pddl';
-  var newProb = 'testing/prob.' + rand + '.pddl';
-  var newPlan = 'testing/plan.'+rand+'.ipc';
-  var newOut = 'testing/output.' + rand;
-  download(domainLoc, newDom, function() {
-    download(problemLoc, newProb, function () {
-      whendone(null, {'domain':newDom, 'problem':newProb, 'plan':newPlan, 'outfile':newOut});
+app.fetchDomains = function(domainLoc, problemLoc, path, whendone) {
+  var domainPath = path + '/domain.pddl';
+  var problemPath = path + '/problem.pddl';
+  download(domainLoc, domainPath,
+  function _domDownloaded() {
+    download(problemLoc, problemPath,
+    function _probDownloaded() {
+      whendone(null, {'domainPath': domainPath, 'problemPath': problemPath});
     });
   });
 };
 
-app.readDomains = function(domdata, probdata, whendone) {
-  var rand = new Date().getTime();
-  var newDom = 'testing/domain.' + rand + '.pddl';
-  var newProb = 'testing/prob.' + rand + '.pddl';
-  var newPlan = 'testing/plan.'+rand+'.ipc';
-  var newOut = 'testing/output.' + rand;
-  fs.writeFile(newDom, domdata.split('\\n').join('\n').split('\\t').join('\t'), function() {
-    fs.writeFile(newProb, probdata.split('\\n').join('\n').split('\\t').join('\t'), function () {
-      whendone(null, {'domain':newDom, 'problem':newProb, 'plan':newPlan, 'outfile':newOut});
-    });
-  });
-}
-
-app.fetchDomainsByID = function(probID, whendone) {
-  request({
-    url: 'http://api.planning.domains/problem/' + probID,
-    json: true
-  }, function(error, response, body) {
-    if (!error && response.statusCode === 200) {
-      app.fetchDomains(body.result.dom_url, body.result.prob_url, whendone);
+app.readDomains = function(domdata, probdata, path, whendone) {
+  var domainPath = path + '/domain.pddl';
+  var problemPath = path + '/problem.pddl';
+  app.storeFile(domdata, domainPath,
+  function _domStored(domErr, domRes) {
+    if (domErr) {
+      whendone(domErr, null);
     } else {
-      app.failUnexpected(body, whendone);
+      app.storeFile(probdata, problemPath,
+      function _probStored(probErr, probRes) {
+        if (probErr) {
+          whendone(probErr, null);
+        } else {
+          whendone(null, {'domainPath': domainPath, 'problemPath': problemPath});
+        }
+      });
     }
   });
 }
 
-app.getDomains = function(probID, problem, domain, is_url, whendone) {
-  if (typeof probID != 'undefined') {
-    app.fetchDomainsByID(probID, whendone);
+app.fetchDomainsByID = function(problemID, path, whendone) {
+  request({
+    url: 'http://api.planning.domains/problem/' + problemID,
+    json: true
+  },
+  function _handleResponse(error, response, body) {
+    if (error) {
+      whendone(error, null);
+    } else if (response.statusCode != 200) {
+      whendone(body, null);
+    } else {
+      app.fetchDomains(body.result.dom_url, body.result.prob_url, path, whendone);
+    }
+  });
+}
+
+app.getDomains = function(problemID, problem, domain, is_url, path, whendone) {
+  if (typeof problemID != 'undefined') {
+    app.fetchDomainsByID(problemID, path, whendone);
   } else if ((typeof problem != 'undefined') && (typeof domain != 'undefined')) {
     if(typeof is_url === 'undefined' || is_url === false) {
-      app.readDomains(domain, problem, whendone);
+      app.readDomains(domain, problem, path, whendone);
     } else {
-      app.fetchDomains(domain, problem, whendone);
+      app.fetchDomains(domain, problem, path, whendone);
     }
   } else {
-    app.failUnexpected("Must define either domain and problem or probID.", whendone);
+    whendone("Must define either domain and problem or probID.", null);
   }
 }
 
-app.solve = function(dom, prob, plan, outfile, whendone) {
-  exec('./plan ' + dom + ' ' + prob + ' ' + plan +
-       ' > ' + outfile + ' 2>&1; echo; echo Plan:; cat ' + plan,
-       { timeout: 10000 }, function (error, stdout, stderr) {
-         app.parsePlan(dom, prob, plan, outfile, whendone);
-  });
-};
-
-app.parsePlan = function(dom, prob, plan, outfile, whendone) {
-  exec('python process_solution.py ' + dom + ' ' + prob + ' ' + plan + ' ' + outfile,
-       { timeout: 5000 }, function (error, stdout, stderr) {
-         whendone(error, JSON.parse(stdout));
-  });
-};
-
-app.validate = function(dom, prob, plan, whendone) {
-  exec('./validate -S ' + dom + ' ' + prob + ' ' + plan,
-    { timeout: 10000 }, function (error, stdout, stderr) {
-      if (error) {
-        app.failValidate(dom, prob, plan, whendone)
-      } else if (stderr) {
-        app.failUnexpected("Validator wrote to stderr but did not report an error: " + stderr, whendone);
-      } else if (isNaN(stdout.trim())) {
-        app.failUnnexpected("Validator output does not look as expected. stdout: " + stdout, whendone)
-      } else {
-        app.succeedValidate(parseInt(stdout.trim()), whendone);
-      }
-  });
-};
-
-app.failValidate = function(dom, prob, plan, whendone) {
-  exec('./validate -e ' + dom + ' ' + prob + ' ' + plan, { timeout: 10000 },
-    function (error, stdout, stderr) {
-      var response = {
-        'result': 'err',
-        'error': 'Plan is invalid.',
-        'val_stdout': stdout,
-        'val_stderr': stderr
-      };
-      whendone(error, response);
+app.solve = function(domainPath, problemPath, cwd, whendone) {
+  var planPath = cwd + '/plan';
+  var logPath = cwd + '/log';
+  var addPathsAndRespond = function(error, result) {
+    if (result) {
+      result['planPath'] = planPath;
+      result['logPath'] = logPath;
     }
-  );
-}
+    whendone(error, result);
+  };
+  exec('./plan ' + domainPath + ' ' + problemPath + ' ' + planPath
+       + ' > ' + logPath + ' 2>&1; echo; echo Plan:; cat ' + planPath,
+       { timeout: 10000, cwd: cwd },
+  function _processStopped(error, stdout, stderr) {
+    if (error)
+      whendone(error, null);
+    else
+      app.parsePlan(domainPath, problemPath, planPath, logPath, cwd, addPathsAndRespond);
+  });
+};
 
-app.failUnexpected = function(message, whendone) {
-  whendone(null, {'result': 'err', 'error': message});
-}
+app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendone) {
+  exec('python process_solution.py ' + domainPath + ' ' + problemPath + ' ' + planPath + ' ' + logPath,
+       { timeout: 5000, cwd: cwd },
+  function _processStopped(error, stdout, stderr) {
+    if (error)
+      whendone(error, null);
+    else
+      whendone(null, JSON.parse(stdout));
+  });
+};
 
-app.succeedValidate = function(cost, whendone) {
-  whendone(null, {'result': 'valid', 'error': false, 'cost': cost});
-}
-
-app.cleanUp = function(filenames, whendone) {
-  exec('rm -f ' + filenames.join(" "),
-    function (err, stdout, stderr) {
-      whendone(err, {'rm_stdout':stdout, 'rm_stderr':stderr});
+app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
+  exec('./validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
+    { timeout: 10000, cwd: cwd },
+  function _processStopped(error, stdout, stderr) {
+    if (error) {
+      app.failValidate(domainPath, problemPath, planPath, cwd, whendone)
+    } else if (stderr) {
+      whendone("Validator wrote to stderr but did not report an error: " + stderr, null);
+    } else if (isNaN(stdout.trim())) {
+      whendone("Validator output does not look as expected. stdout: " + stdout, null)
+    } else {
+      var cost = parseInt(stdout.trim());
+      whendone(null, {'result': 'valid', 'error': false, 'cost': cost});
     }
-  );
+  });
+};
+
+app.failValidate = function(domainPath, problemPath, planPath, cwd, whendone) {
+  exec('./validate -e ' + domainPath + ' ' + problemPath + ' ' + planPath,
+    { timeout: 10000, cwd: cwd },
+  function _processStopped(error, stdout, stderr) {
+    whendone({
+      'result': 'err',
+      'error': 'Plan is invalid.',
+      'val_stdout': stdout,
+      'val_stderr': stderr
+    }, null);
+  });
 }
 
+app.errorToText = function(err) {
+    return "Error :" + err;
+}
+
+app.resultToText = function(result) {
+  var toRet = '';
+  if (result['result'] === 'err') {
+    toRet += "No plan found. Error:\n" + result['error'];
+  } else {
+    toRet += "Plan Found:\n  ";
+    for (var i = 0; i < result['plan'].length; i++)
+      toRet += "\n  " + result['plan'][i]['name'];
+  }
+  toRet += "\n\n\nOutput:\n";
+  toRet += result['output'];
+  return toRet;
+}
 
 app.set('view engine', 'ejs'); // set up ejs for templating
 
