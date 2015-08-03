@@ -121,9 +121,9 @@ app.solve = function(domainPath, problemPath, cwd, whendone) {
     }
     whendone(error, result);
   };
-  exec('./plan ' + domainPath + ' ' + problemPath + ' ' + planPath
+  exec(__dirname + '/plan ' + domainPath + ' ' + problemPath + ' ' + planPath
        + ' > ' + logPath + ' 2>&1; echo; echo Plan:; cat ' + planPath,
-       { timeout: 10000 },
+       { timeout: 10000, cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     if (error)
       whendone(error, null);
@@ -133,8 +133,9 @@ app.solve = function(domainPath, problemPath, cwd, whendone) {
 };
 
 app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendone) {
-  exec('python process_solution.py ' + domainPath + ' ' + problemPath + ' ' + planPath + ' ' + logPath,
-       { timeout: 5000 },
+  exec('python ' + __dirname + '/process_solution.py '
+       + domainPath + ' ' + problemPath + ' ' + planPath + ' ' + logPath,
+       { timeout: 5000, cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     if (error)
       whendone(error, null);
@@ -144,8 +145,8 @@ app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendo
 };
 
 app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
-  exec('./validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
-    { timeout: 10000 },
+  exec(__dirname + '/validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
+    { timeout: 10000, cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     if (error) {
       app.failValidate(domainPath, problemPath, planPath, cwd, whendone)
@@ -161,8 +162,8 @@ app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
 };
 
 app.failValidate = function(domainPath, problemPath, planPath, cwd, whendone) {
-  exec('./validate -e ' + domainPath + ' ' + problemPath + ' ' + planPath,
-    { timeout: 10000 },
+  exec(__dirname + '/validate -e ' + domainPath + ' ' + problemPath + ' ' + planPath,
+    { timeout: 10000, cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     whendone({
       'result': 'err',
