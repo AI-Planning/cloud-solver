@@ -83,7 +83,7 @@ app.readDomains = function(domdata, probdata, path, whendone) {
 
 app.fetchDomainsByID = function(problemID, path, whendone) {
   request({
-    url: 'http://api.planning.domains/problem/' + problemID,
+    url: 'http://api.planning.domains/json/classical/problem/' + problemID,
     json: true
   },
   function _handleResponse(error, response, body) {
@@ -92,7 +92,7 @@ app.fetchDomainsByID = function(problemID, path, whendone) {
     } else if (response.statusCode != 200) {
       whendone(body, null);
     } else {
-      app.fetchDomains(body.result.dom_url, body.result.prob_url, path, whendone);
+      app.fetchDomains(body.result.domain_url, body.result.problem_url, path, whendone);
     }
   });
 }
@@ -122,7 +122,8 @@ app.solve = function(domainPath, problemPath, cwd, whendone) {
     whendone(error, result);
   };
   exec(__dirname + '/plan ' + domainPath + ' ' + problemPath + ' ' + planPath
-       + ' > ' + logPath + ' 2>&1; echo; echo Plan:; cat ' + planPath,
+       + ' > ' + logPath + ' 2>&1; '
+       + 'if [ -f ' + planPath + ' ]; then echo; echo Plan:; cat ' + planPath + '; fi',
        { timeout: 10000, cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     if (error)

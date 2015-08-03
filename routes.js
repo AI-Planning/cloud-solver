@@ -54,7 +54,7 @@ module.exports = function(app) {
       if (dirErr) {
         cleanupAndRespond(dirErr, null);
       } else {
-        app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.body.is_url, path,
+        app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url, path,
         function _domainsRetrieved(domErr, domRes) {
           if (domErr) {
             cleanupAndRespond(domErr, null);
@@ -70,6 +70,11 @@ module.exports = function(app) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
 
+    if (typeof req.body.plan == 'undefined') {
+      res.end(JSON.stringify('Error: No plan to verify', null, 3));
+      return;
+    }
+
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
       var cleanupAndRespond = function(error, result) {
@@ -80,18 +85,18 @@ module.exports = function(app) {
       if (dirErr) {
         cleanupAndRespond(dirErr, null);
       } else {
-        app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.body.is_url, path,
+        app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url, path,
         function _domainsRetrieved(domErr, domRes) {
           if (domErr) {
             cleanupAndRespond(domErr, null);
           } else {
             var planPath = path + '/plan';
-            app.storeFile(planPath, req.body.plan,
+            app.storeFile(req.body.plan, planPath,
             function _planStored(planErr, planRes) {
               if (planErr) {
                 cleanupAndRespond(planErr, null);
               } else {
-                app.validate(domres.domainPath, domres.problemPath, planPath, path, cleanupAndRespond);
+                app.validate(domRes.domainPath, domRes.problemPath, planPath, path, cleanupAndRespond);
               }
             });
           }
@@ -114,23 +119,25 @@ module.exports = function(app) {
       if (dirErr) {
         cleanupAndRespond(dirErr, null);
       } else {
-        app.getDomains(req.query.probID, req.query.problem, req.query.domain, req.body.is_url, path,
+        app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url, path,
         function _domainsRetrieved(domErr, domRes) {
           if (domErr) {
             cleanupAndRespond(domErr, null);
           } else {
-            app.solve(domainPath, problemPath, path,
+            app.solve(domRes.domainPath, domRes.problemPath, path,
             function _solved(solveErr, solveRes) {
               if (solveErr) {
                 cleanupAndRespond(solveErr, null);
               } else {
-                app.validate(domres.domainPath, domres.problemPath, solveRes.planPath, path,
+                app.validate(domRes.domainPath, domRes.problemPath, solveRes.planPath, path,
                 function _validated(valErr, valRes) {
                   if (valErr) {
                     cleanupAndRespond(valErr, null);
                   } else {
                     var response = solveRes;
-                    response.update(valRes);
+                    for (var attribute in valRes) {
+                        response[attribute] = valRes[attribute];
+                    }
                     cleanupAndRespond(null, response);
                   }
                 });
