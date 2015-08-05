@@ -29,6 +29,8 @@ app.use(express.static(__dirname + '/client'));
 app.use(bodyParser.json());
 app.use(cookieParser('I am a banana!'));
 
+app.last_call = 0;
+
 var download = function(url, dest, cb) {
   var file = fs.createWriteStream(dest);
   http.get(url,

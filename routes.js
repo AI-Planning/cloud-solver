@@ -14,10 +14,19 @@ module.exports = function(app) {
 
   app.get('/solve', function(req, res) {
     res.setHeader('Content-Type', 'text/plain');
+    
+    // Only allow a call every 13 seconds
+    var time_diff = (new Date()).getTime() - app.last_call;
+    if (time_diff < 13000) {
+      res.end("Server busy...");
+      return;
+    }
+    app.last_call = (new Date()).getTime();
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
       var cleanupAndRespond = function(error, result) {
+        app.last_call = 0;
         if (error) {
           res.end(app.errorToText(error))
         } else {
@@ -43,10 +52,19 @@ module.exports = function(app) {
   app.post('/solve', function(req, res) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
+    
+    // Only allow a call every 13 seconds
+    var time_diff = (new Date()).getTime() - app.last_call;
+    if (time_diff < 13000) {
+      res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
+      return;
+    }
+    app.last_call = (new Date()).getTime();
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
       var cleanupAndRespond = function(error, result) {
+        app.last_call = 0;
         var message = error || result;
         res.end(JSON.stringify(message, null, 3))
         cleanupCallback();
@@ -74,10 +92,19 @@ module.exports = function(app) {
       res.end(JSON.stringify('Error: No plan to verify', null, 3));
       return;
     }
+    
+    // Only allow a call every 13 seconds
+    var time_diff = (new Date()).getTime() - app.last_call;
+    if (time_diff < 13000) {
+      res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
+      return;
+    }
+    app.last_call = (new Date()).getTime();
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
       var cleanupAndRespond = function(error, result) {
+        app.last_call = 0;
         var message = error || result;
         res.end(JSON.stringify(message, null, 3))
         cleanupCallback();
@@ -108,10 +135,19 @@ module.exports = function(app) {
   app.post('/solve-and-validate', function(req, res) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
+    
+    // Only allow a call every 13 seconds
+    var time_diff = (new Date()).getTime() - app.last_call;
+    if (time_diff < 13000) {
+      res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
+      return;
+    }
+    app.last_call = (new Date()).getTime();
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
       var cleanupAndRespond = function(error, result) {
+        app.last_call = 0;
         var message = error || result;
         res.end(JSON.stringify(message, null, 3))
         cleanupCallback();
