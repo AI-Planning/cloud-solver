@@ -193,7 +193,7 @@ app.failValidate = function(domainPath, problemPath, planPath, cwd, whendone) {
 }
 
 app.errorToText = function(err) {
-    return "Error :" + err;
+    return "Error :" + JSON.stringify(err, null, 3);
 }
 
 app.resultToText = function(result) {
