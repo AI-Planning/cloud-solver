@@ -74,6 +74,7 @@ planningapi = function() {
                                    "is_url": true
                     })
     }).done(function (res) {
+      console.log(res);
       if (res['result'] === 'ok') {
         progressbar_success();
 
