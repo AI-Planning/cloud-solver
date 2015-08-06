@@ -91,7 +91,10 @@ planningapi = function() {
 
       } else {
         progressbar_error();
-        $("#planner_output").html("<pre>" + res.result + "</pre>");
+        if (typeof res.result.killed != 'undefined')
+          $("#planner_output").html("<pre>Planner Timed Out</pre>");
+        else
+          $("#planner_output").html("<pre>" + JSON.stringify(res.result, null, 3) + "</pre>");
       }
     }).fail(function (jqxhr, error) {
       progressbar_error();
