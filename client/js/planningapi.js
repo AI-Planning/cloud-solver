@@ -74,13 +74,16 @@ planningapi = function() {
                                    "is_url": true
                     })
     }).done(function (res) {
-      console.log(res);
+      console.log("Server responce: " + res);
       if (res['status'] === 'ok') {
         progressbar_success();
 
         var items = [];
         $.each(res.result.plan, function(index, val) {
-          items.push("<li>" + val.name + "</li>");
+          if (res.result.type === 'full')
+            items.push("<li>" + val.name + "</li>");
+          else
+            items.push("<li>" + val + "</li>");
         });
         $("#solution").html("<ol>" + items.join("") + "</ol>");
         $("#planner_output").html("<pre>" + $('<div/>').text(res.result.output).html() + "</pre>");
