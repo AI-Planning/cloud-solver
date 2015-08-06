@@ -75,19 +75,19 @@ planningapi = function() {
                     })
     }).done(function (res) {
       console.log(res);
-      if (res['result'] === 'ok') {
+      if (res['status'] === 'ok') {
         progressbar_success();
 
         var items = [];
-        $.each(res.plan, function(index, val) {
+        $.each(res.result.plan, function(index, val) {
           items.push("<li>" + val.name + "</li>");
         });
         $("#solution").html("<ol>" + items.join("") + "</ol>");
-        $("#planner_output").html("<pre>" + $('<div/>').text(res.output).html() + "</pre>");
+        $("#planner_output").html("<pre>" + $('<div/>').text(res.result.output).html() + "</pre>");
 
       } else {
         progressbar_error();
-        $("#planner_output").html("<pre>" + res.error + "</pre>");
+        $("#planner_output").html("<pre>" + res.result + "</pre>");
       }
     }).fail(function (jqxhr, error) {
       progressbar_error();
