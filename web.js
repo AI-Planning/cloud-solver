@@ -142,8 +142,11 @@ app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendo
   function _processStopped(error, stdout, stderr) {
     if (error)
       whendone(error, null);
+    result = JSON.parse(stdout);
+    if (result.parse_status === 'err')
+      whendone(result, null);
     else
-      whendone(null, JSON.parse(stdout));
+      whendone(null, result);
   });
 };
 
@@ -154,12 +157,26 @@ app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
     if (error) {
       app.failValidate(domainPath, problemPath, planPath, cwd, whendone)
     } else if (stderr) {
-      whendone("Validator wrote to stderr but did not report an error: " + stderr, null);
+      whendone({
+        'val_status': 'err',
+        'error':'Validator wrote to stderr but did not report an error.',
+        'val_stdout': stdout,
+        'val_stderr': stderr
+      }, null);
     } else if (isNaN(stdout.trim())) {
-      whendone("Validator output does not look as expected. stdout: " + stdout, null)
+      whendone({
+        'val_status': 'err',
+        'error':'Validator output does not look as expected.',
+        'val_stdout': stdout,
+        'val_stderr': stderr
+      }, null)
     } else {
       var cost = parseInt(stdout.trim());
-      whendone(null, {'result': 'valid', 'error': false, 'cost': cost});
+      whendone(null, {'val_status': 'valid',
+                      'error': false,
+                      'val_stdout': stdout,
+                      'val_stderr': stderr,
+                      'cost': cost});
     }
   });
 };
@@ -169,7 +186,7 @@ app.failValidate = function(domainPath, problemPath, planPath, cwd, whendone) {
     { timeout: 10000, cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     whendone({
-      'result': 'err',
+      'val_status': 'err',
       'error': 'Plan is invalid.',
       'val_stdout': stdout,
       'val_stderr': stderr
@@ -178,12 +195,12 @@ app.failValidate = function(domainPath, problemPath, planPath, cwd, whendone) {
 }
 
 app.errorToText = function(err) {
-    return "Error :" + err;
+    return "Error :" + JSON.stringify(err, null, 3);
 }
 
 app.resultToText = function(result) {
   var toRet = '';
-  if (result['result'] === 'err') {
+  if (result['parse_status'] === 'err') {
     toRet += "No plan found. Error:\n" + result['error'];
   } else {
     toRet += "Plan Found:\n  ";

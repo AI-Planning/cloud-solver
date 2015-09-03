@@ -20,14 +20,14 @@ def getActionDetails(task, plan, output):
         a = act_map[a_name]
         actions.append({'name': act_line, 'action': a.export(grounding=a_params)})
         
-    return json.dumps({'result': 'ok',
+    return json.dumps({'parse_status': 'ok',
                        'type': 'full',
                        'length': len(plan),
                        'plan': actions,
                        'output': output}, indent=4)
 
 def getSimplePlan(task, plan, err_msg, output):
-    return json.dumps({'result': 'ok',
+    return json.dumps({'parse_status': 'ok',
                        'type': 'simple',
                        'length': len(plan),
                        'plan': plan,
@@ -43,19 +43,19 @@ def doit(domain, problem, solution, outfile):
         solver_output = file.read()
         file.close()
     except Exception, e:
-        return json.dumps({'result': 'err', 'output': solver_output,
+        return json.dumps({'parse_status': 'err', 'output': solver_output,
                            'error': "Failed to read solver output -- %s" % str(e)})
     
     try:
         task = Problem(domain, problem)
     except Exception, e:
-        return json.dumps({'result': 'err', 'output': solver_output,
+        return json.dumps({'parse_status': 'err', 'output': solver_output,
                            'error': "Failed to parse the problem -- %s\n\n%s" % (str(e), solver_output)})
     
     try:
         
         if not os.path.isfile(solution):
-            return json.dumps({'result': 'err', 'output': solver_output,
+            return json.dumps({'parse_status': 'err', 'output': solver_output,
                                'error': "Solver failed.\n\n%s" % solver_output})
         
         file = open(solution, 'r')
@@ -64,13 +64,13 @@ def doit(domain, problem, solution, outfile):
         
         if (len(plan) == 0) or (len(plan) == 1 and plan[0] == ''):
             err_str = "Suspected timeout.\n\n%s" % solver_output
-            return json.dumps({'result': 'err', 'output': solver_output, 'error': err_str})
+            return json.dumps({'parse_status': 'err', 'output': solver_output, 'error': err_str})
         
         if '' == plan[-1]:
             plan = plan[:-1]
             
     except Exception, e:
-        return json.dumps({'result': 'err', 'output': solver_output,
+        return json.dumps({'parse_status': 'err', 'output': solver_output,
                            'error': "Failed to parse plan -- %s\n\n%s" % (str(e), solver_output)})
     
     try:
@@ -86,3 +86,4 @@ if __name__ == '__main__':
     solverout = sys.argv[4]
     
     print doit(domain, problem, solution, solverout)
+

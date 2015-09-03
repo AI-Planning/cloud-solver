@@ -66,7 +66,10 @@ module.exports = function(app) {
       var cleanupAndRespond = function(error, result) {
         app.last_call = 0;
         var message = error || result;
-        res.end(JSON.stringify(message, null, 3))
+        if (error)
+          res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
+        else
+          res.end(JSON.stringify({'status':'ok', 'result':message}, null, 3));
         cleanupCallback();
       };
       if (dirErr) {
@@ -89,7 +92,7 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'application/json');
 
     if (typeof req.body.plan == 'undefined') {
-      res.end(JSON.stringify('Error: No plan to verify', null, 3));
+      res.end(JSON.stringify({'status':'error', 'result':'Error: No plan to verify'}, null, 3));
       return;
     }
     
@@ -106,7 +109,10 @@ module.exports = function(app) {
       var cleanupAndRespond = function(error, result) {
         app.last_call = 0;
         var message = error || result;
-        res.end(JSON.stringify(message, null, 3))
+        if (error)
+          res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
+        else
+          res.end(JSON.stringify({'status':'ok', 'result':message}, null, 3));
         cleanupCallback();
       };
       if (dirErr) {
@@ -149,7 +155,10 @@ module.exports = function(app) {
       var cleanupAndRespond = function(error, result) {
         app.last_call = 0;
         var message = error || result;
-        res.end(JSON.stringify(message, null, 3))
+        if (error)
+          res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
+        else
+          res.end(JSON.stringify({'status':'ok', 'result':message}, null, 3));
         cleanupCallback();
       };
       if (dirErr) {
