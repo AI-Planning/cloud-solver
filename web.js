@@ -81,7 +81,7 @@ app.readDomains = function(domdata, probdata, path, whendone) {
       });
     }
   });
-}
+};
 
 app.fetchDomainsByID = function(problemID, path, whendone) {
   request({
@@ -97,7 +97,7 @@ app.fetchDomainsByID = function(problemID, path, whendone) {
       app.fetchDomains(body.result.domain_url, body.result.problem_url, path, whendone);
     }
   });
-}
+};
 
 app.getDomains = function(problemID, problem, domain, is_url, path, whendone) {
   if (typeof problemID != 'undefined') {
@@ -111,7 +111,7 @@ app.getDomains = function(problemID, problem, domain, is_url, path, whendone) {
   } else {
     whendone("Must define either domain and problem or probID.", null);
   }
-}
+};
 
 app.solve = function(domainPath, problemPath, cwd, whendone) {
   var planPath = cwd + '/plan';
@@ -142,7 +142,7 @@ app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendo
   function _processStopped(error, stdout, stderr) {
     if (error)
       whendone(error, null);
-    result = JSON.parse(stdout);
+    var result = JSON.parse(stdout);
     if (result.parse_status === 'err')
       whendone(result, null);
     else
@@ -155,7 +155,7 @@ app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
     { timeout: 10000, cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     if (error) {
-      app.failValidate(domainPath, problemPath, planPath, cwd, whendone)
+      app.failValidate(domainPath, problemPath, planPath, cwd, whendone);
     } else if (stderr) {
       whendone({
         'val_status': 'err',
@@ -169,9 +169,9 @@ app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
         'error':'Validator output does not look as expected.',
         'val_stdout': stdout,
         'val_stderr': stderr
-      }, null)
+      }, null);
     } else {
-      var cost = parseInt(stdout.trim());
+      var cost = parseInt(stdout.trim(), 10);
       whendone(null, {'val_status': 'valid',
                       'error': false,
                       'val_stdout': stdout,
@@ -192,11 +192,11 @@ app.failValidate = function(domainPath, problemPath, planPath, cwd, whendone) {
       'val_stderr': stderr
     }, null);
   });
-}
+};
 
 app.errorToText = function(err) {
     return "Error :" + JSON.stringify(err, null, 3);
-}
+};
 
 app.resultToText = function(result) {
   var toRet = '';
@@ -210,7 +210,7 @@ app.resultToText = function(result) {
   toRet += "\n\n\nOutput:\n";
   toRet += result['output'];
   return toRet;
-}
+};
 
 app.set('view engine', 'ejs'); // set up ejs for templating
 
