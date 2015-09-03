@@ -43,3 +43,4 @@ Contributors
 ------------
 * [Christian Muise](http://www.haz.ca/)
 * [Simon Vernhes](https://vernhes.eu/)
+* [Florian Pommerening](http://ai.cs.unibas.ch/people/pommeren/)
