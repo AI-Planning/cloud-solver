@@ -74,19 +74,27 @@ planningapi = function() {
                                    "is_url": true
                     })
     }).done(function (res) {
-      if (res['result'] === 'ok') {
+      console.log("Server responce:")
+      console.log(res);
+      if (res['status'] === 'ok') {
         progressbar_success();
 
         var items = [];
-        $.each(res.plan, function(index, val) {
-          items.push("<li>" + val.name + "</li>");
+        $.each(res.result.plan, function(index, val) {
+          if (res.result.type === 'full')
+            items.push("<li>" + val.name + "</li>");
+          else
+            items.push("<li>" + val + "</li>");
         });
         $("#solution").html("<ol>" + items.join("") + "</ol>");
-        $("#planner_output").html("<pre>" + $('<div/>').text(res.output).html() + "</pre>");
+        $("#planner_output").html("<pre>" + $('<div/>').text(res.result.output).html() + "</pre>");
 
       } else {
         progressbar_error();
-        $("#planner_output").html("<pre>" + res.error + "</pre>");
+        if (typeof res.result.killed != 'undefined')
+          $("#planner_output").html("<pre>Planner Timed Out</pre>");
+        else
+          $("#planner_output").html("<pre>" + JSON.stringify(res.result, null, 3) + "</pre>");
       }
     }).fail(function (jqxhr, error) {
       progressbar_error();
