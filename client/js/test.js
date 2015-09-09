@@ -19,7 +19,7 @@ function run_tests() {
     test10();*/
 }
 
-function show_results(lid, resp) {
+function show_result(lid, resp) {
     console.log(resp);
 }
 
