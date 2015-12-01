@@ -28,6 +28,7 @@
     "express": "^4.12.4",
     "express-method-override": "0.0.3",
     "morgan": "^1.5.3",
+    "ps-tree": "^1.0.1",
     "request": "^2.60.0",
     "tmp": "0.0.26"
   }
