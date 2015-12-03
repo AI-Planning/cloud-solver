@@ -22,9 +22,15 @@ module.exports = function(app) {
       res.end("Heap recording not yet started...");
     else {
       var diff = app.heap.end();
-      res.end(JSON.stringify(diff));
+      res.end(JSON.stringify(diff, null, 3));
       app.heap = false;
     }
+  });
+
+  app.get('/psaux', function(req, res) {
+    app.cp.exec('ps aux', { timeout: 5000 }, function (error, stdout, stderr) {
+      res.end(stdout);
+    });
   });
 
   app.get('/solve', function(req, res) {

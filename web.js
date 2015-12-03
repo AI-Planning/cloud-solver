@@ -31,8 +31,9 @@ app.use(express.static(__dirname + '/client'));
 app.use(bodyParser.json());
 app.use(cookieParser('I am a banana!'));
 
-// Keep around memwatch for debugging purposes
+// Keep around memwatch and cp for debugging purposes
 app.memwatch = memwatch;
+app.cp = cp;
 
 app.lock = false;
 app.get_lock = function() {
