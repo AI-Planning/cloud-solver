@@ -48,6 +48,7 @@ app.release_lock = function() { app.lock = false; };
 // https://github.com/nisaacson/is-running
 // Killing with signal 0 is just a trick to see if the process is still going
 app.is_running = function(pid) {
+  console.log("Checking to see if " + pid + " is still running...");
   try {
     return process.kill(pid,0);
   } catch (e) {
@@ -57,7 +58,7 @@ app.is_running = function(pid) {
 
 // https://github.com/indexzero/ps-tree
 app.kill_all = function(pid) {
-  console.log("Killing " + pid + " and children.");
+  console.log("Killing " + pid + " and children...");
   pstree(pid, function (error, children) {
     cp.spawn('kill', ['-9'].concat(children.map(function (p) { return p.PID })));
   });
