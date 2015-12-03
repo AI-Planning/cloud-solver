@@ -42,6 +42,8 @@ app.get_lock = function() {
   return true;
 };
 
+app.release_lock = function() { app.lock = false; };
+
 // https://github.com/nisaacson/is-running
 // Killing with signal 0 is just a trick to see if the process is still going
 app.is_running = function(pid) {
