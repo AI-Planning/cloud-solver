@@ -31,38 +31,34 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'text/plain');
 
     // Only allow one solve at a time
-    app.mutex.lock('solve', function(err, unlock) {
-      if (err) {
-        res.end("Server busy...");
-        return;
-      }
+    if (!app.get_lock()) {
+      res.end("Server busy...");
+      return;
+    }
 
-      tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
-      function _tempDirCreated(dirErr, path, cleanupCallback) {
-        var cleanupAndRespond = function(error, result) {
-
-          unlock();
-
-          if (error) {
-            res.end(app.errorToText(error));
-          } else {
-            res.end(app.resultToText(result));
-          }
-          cleanupCallback();
-        };
-        if (dirErr) {
-          cleanupAndRespond(dirErr, null);
+    tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
+    function _tempDirCreated(dirErr, path, cleanupCallback) {
+      var cleanupAndRespond = function(error, result) {
+        app.release_lock();
+        if (error) {
+          res.end(app.errorToText(error));
         } else {
-          app.getDomains(req.query.probID, req.query.problem, req.query.domain, true, path,
-          function _domainsRetrieved(domErr, domRes) {
-            if (domErr) {
-              cleanupAndRespond(domErr, null);
-            } else {
-              app.solve(domRes.domainPath, domRes.problemPath, path, cleanupAndRespond);
-            }
-          });
+          res.end(app.resultToText(result));
         }
-      });
+        cleanupCallback();
+      };
+      if (dirErr) {
+        cleanupAndRespond(dirErr, null);
+      } else {
+        app.getDomains(req.query.probID, req.query.problem, req.query.domain, true, path,
+        function _domainsRetrieved(domErr, domRes) {
+          if (domErr) {
+            cleanupAndRespond(domErr, null);
+          } else {
+            app.solve(domRes.domainPath, domRes.problemPath, path, cleanupAndRespond);
+          }
+        });
+      }
     });
   });
 
@@ -71,38 +67,34 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'application/json');
 
     // Only allow one solve at a time
-    app.mutex.lock('solve', function(err, unlock) {
-      if (err) {
-        res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
-        return;
+    if (!app.get_lock()) {
+      res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
+      return;
+    }
+
+    tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
+    function _tempDirCreated(dirErr, path, cleanupCallback) {
+      var cleanupAndRespond = function(error, result) {
+        app.release_lock();
+        var message = error || result;
+        if (error)
+          res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
+        else
+          res.end(JSON.stringify({'status':'ok', 'result':message}, null, 3));
+        cleanupCallback();
+      };
+      if (dirErr) {
+        cleanupAndRespond(dirErr, null);
+      } else {
+        app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url, path,
+        function _domainsRetrieved(domErr, domRes) {
+          if (domErr) {
+            cleanupAndRespond(domErr, null);
+          } else {
+            app.solve(domRes.domainPath, domRes.problemPath, path, cleanupAndRespond);
+          }
+        });
       }
-
-      tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
-      function _tempDirCreated(dirErr, path, cleanupCallback) {
-        var cleanupAndRespond = function(error, result) {
-
-          unlock();
-
-          var message = error || result;
-          if (error)
-            res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
-          else
-            res.end(JSON.stringify({'status':'ok', 'result':message}, null, 3));
-          cleanupCallback();
-        };
-        if (dirErr) {
-          cleanupAndRespond(dirErr, null);
-        } else {
-          app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url, path,
-          function _domainsRetrieved(domErr, domRes) {
-            if (domErr) {
-              cleanupAndRespond(domErr, null);
-            } else {
-              app.solve(domRes.domainPath, domRes.problemPath, path, cleanupAndRespond);
-            }
-          });
-        }
-      });
     });
   });
 
@@ -116,46 +108,42 @@ module.exports = function(app) {
     }
 
     // Only allow one solve at a time
-    app.mutex.lock('solve', function(err, unlock) {
-      if (err) {
-        res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
-        return;
+    if (!app.get_lock()) {
+      res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
+      return;
+    }
+
+    tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
+    function _tempDirCreated(dirErr, path, cleanupCallback) {
+      var cleanupAndRespond = function(error, result) {
+        app.release_lock();
+        var message = error || result;
+        if (error)
+          res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
+        else
+          res.end(JSON.stringify({'status':'ok', 'result':message}, null, 3));
+        cleanupCallback();
+      };
+      if (dirErr) {
+        cleanupAndRespond(dirErr, null);
+      } else {
+        app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url, path,
+        function _domainsRetrieved(domErr, domRes) {
+          if (domErr) {
+            cleanupAndRespond(domErr, null);
+          } else {
+            var planPath = path + '/plan';
+            app.storeFile(req.body.plan, planPath,
+            function _planStored(planErr, planRes) {
+              if (planErr) {
+                cleanupAndRespond(planErr, null);
+              } else {
+                app.validate(domRes.domainPath, domRes.problemPath, planPath, path, cleanupAndRespond);
+              }
+            });
+          }
+        });
       }
-
-      tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
-      function _tempDirCreated(dirErr, path, cleanupCallback) {
-        var cleanupAndRespond = function(error, result) {
-
-          unlock();
-
-          var message = error || result;
-          if (error)
-            res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
-          else
-            res.end(JSON.stringify({'status':'ok', 'result':message}, null, 3));
-          cleanupCallback();
-        };
-        if (dirErr) {
-          cleanupAndRespond(dirErr, null);
-        } else {
-          app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url, path,
-          function _domainsRetrieved(domErr, domRes) {
-            if (domErr) {
-              cleanupAndRespond(domErr, null);
-            } else {
-              var planPath = path + '/plan';
-              app.storeFile(req.body.plan, planPath,
-              function _planStored(planErr, planRes) {
-                if (planErr) {
-                  cleanupAndRespond(planErr, null);
-                } else {
-                  app.validate(domRes.domainPath, domRes.problemPath, planPath, path, cleanupAndRespond);
-                }
-              });
-            }
-          });
-        }
-      });
     });
   });
 
@@ -164,56 +152,52 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'application/json');
 
     // Only allow one solve at a time
-    app.mutex.lock('solve', function(err, unlock) {
-      if (err) {
-        res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
-        return;
-      }
+    if (!app.get_lock()) {
+      res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
+      return;
+    }
 
-      tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
-      function _tempDirCreated(dirErr, path, cleanupCallback) {
-        var cleanupAndRespond = function(error, result) {
-
-          unlock();
-
-          var message = error || result;
-          if (error)
-            res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
-          else
-            res.end(JSON.stringify({'status':'ok', 'result':message}, null, 3));
-          cleanupCallback();
-        };
-        if (dirErr) {
-          cleanupAndRespond(dirErr, null);
-        } else {
-          app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url, path,
-          function _domainsRetrieved(domErr, domRes) {
-            if (domErr) {
-              cleanupAndRespond(domErr, null);
-            } else {
-              app.solve(domRes.domainPath, domRes.problemPath, path,
-              function _solved(solveErr, solveRes) {
-                if (solveErr) {
-                  cleanupAndRespond(solveErr, null);
-                } else {
-                  app.validate(domRes.domainPath, domRes.problemPath, solveRes.planPath, path,
-                  function _validated(valErr, valRes) {
-                    if (valErr) {
-                      cleanupAndRespond(valErr, null);
-                    } else {
-                      var response = solveRes;
-                      for (var attribute in valRes) {
-                          response[attribute] = valRes[attribute];
-                      }
-                      cleanupAndRespond(null, response);
+    tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
+    function _tempDirCreated(dirErr, path, cleanupCallback) {
+      var cleanupAndRespond = function(error, result) {
+        app.release_lock();
+        var message = error || result;
+        if (error)
+          res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
+        else
+          res.end(JSON.stringify({'status':'ok', 'result':message}, null, 3));
+        cleanupCallback();
+      };
+      if (dirErr) {
+        cleanupAndRespond(dirErr, null);
+      } else {
+        app.getDomains(req.body.probID, req.body.problem, req.body.domain, req.body.is_url, path,
+        function _domainsRetrieved(domErr, domRes) {
+          if (domErr) {
+            cleanupAndRespond(domErr, null);
+          } else {
+            app.solve(domRes.domainPath, domRes.problemPath, path,
+            function _solved(solveErr, solveRes) {
+              if (solveErr) {
+                cleanupAndRespond(solveErr, null);
+              } else {
+                app.validate(domRes.domainPath, domRes.problemPath, solveRes.planPath, path,
+                function _validated(valErr, valRes) {
+                  if (valErr) {
+                    cleanupAndRespond(valErr, null);
+                  } else {
+                    var response = solveRes;
+                    for (var attribute in valRes) {
+                        response[attribute] = valRes[attribute];
                     }
-                  });
-                }
-              });
-            }
-          });
-        }
-      });
+                    cleanupAndRespond(null, response);
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
     });
   });
 

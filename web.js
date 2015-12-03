@@ -5,9 +5,8 @@ var express = require("express")
   , morgan = require("morgan")
   , cp = require('child_process')
   , pstree = require('ps-tree')
-  , http = require('http')
-  , nodeMutex = require('node-mutex')
   , memwatch = require('memwatch')
+  , http = require('http')
   , fs = require('fs')
   , request = require('request')
   , app = express()
@@ -32,11 +31,16 @@ app.use(express.static(__dirname + '/client'));
 app.use(bodyParser.json());
 app.use(cookieParser('I am a banana!'));
 
-// Expire after 20 seconds just in case we miss an unlock
-app.mutex = nodeMutex({expireTime:20000});
-
 // Keep around memwatch for debugging purposes
 app.memwatch = memwatch;
+
+app.lock = false;
+app.get_lock = function() {
+  if (app.lock)
+    return false;
+  app.lock = true;
+  return true;
+};
 
 // https://github.com/nisaacson/is-running
 // Killing with signal 0 is just a trick to see if the process is still going
