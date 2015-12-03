@@ -57,6 +57,7 @@ app.is_running = function(pid) {
 
 // https://github.com/indexzero/ps-tree
 app.kill_all = function(pid) {
+  console.log("Killing " + pid + " and children.");
   pstree(pid, function (error, children) {
     cp.spawn('kill', ['-9'].concat(children.map(function (p) { return p.PID })));
   });
