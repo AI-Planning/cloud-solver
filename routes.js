@@ -74,7 +74,7 @@ module.exports = function(app) {
 
     // Only allow one solve at a time
     if (!app.get_lock()) {
-      res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
       return;
     }
 
@@ -115,7 +115,7 @@ module.exports = function(app) {
 
     // Only allow one solve at a time
     if (!app.get_lock()) {
-      res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
       return;
     }
 
@@ -159,7 +159,7 @@ module.exports = function(app) {
 
     // Only allow one solve at a time
     if (!app.get_lock()) {
-      res.end(JSON.stringify({ result: 'err', error: "Server busy..." }, null, 3));
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
       return;
     }
 
