@@ -159,24 +159,27 @@ app.solve = function(domainPath, problemPath, cwd, whendone) {
   var child = cp.exec(__dirname + '/plan ' + domainPath + ' ' + problemPath + ' ' + planPath
        + ' > ' + logPath + ' 2>&1; '
        + 'if [ -f ' + planPath + ' ]; then echo; echo Plan:; cat ' + planPath + '; fi',
-       { timeout: 10000, cwd: cwd },
+       { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
-    if (app.is_running(child.pid))
-      app.kill_all(child.pid);
+    //if (app.is_running(child.pid))
+    //  app.kill_all(child.pid);
     if (error)
       whendone(error, null);
     else
       app.parsePlan(domainPath, problemPath, planPath, logPath, cwd, addPathsAndRespond);
   });
+
+  //child.on('exit', function(code) {
+  //});
 };
 
 app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendone) {
-  var child = cp.exec('python ' + __dirname + '/process_solution.py '
+  var child = cp.exec('timeout 5 python ' + __dirname + '/process_solution.py '
        + domainPath + ' ' + problemPath + ' ' + planPath + ' ' + logPath,
-       { timeout: 5000, cwd: cwd },
+       { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
-    if (app.is_running(child.pid))
-      app.kill_all(child.pid);
+    //if (app.is_running(child.pid))
+    //  app.kill_all(child.pid);
     if (error)
       whendone(error, null);
     var result = JSON.parse(stdout);
@@ -188,11 +191,11 @@ app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendo
 };
 
 app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
-  var child = cp.exec(__dirname + '/validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
-    { timeout: 10000, cwd: cwd },
+  var child = cp.exec('timeout 5 ' + __dirname + '/validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
+    { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
-    if (app.is_running(child.pid))
-      app.kill_all(child.pid);
+    //if (app.is_running(child.pid))
+    //  app.kill_all(child.pid);
     if (error) {
       app.failValidate(domainPath, problemPath, planPath, cwd, whendone);
     } else if (stderr) {
@@ -221,11 +224,11 @@ app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
 };
 
 app.failValidate = function(domainPath, problemPath, planPath, cwd, whendone) {
-  var child = cp.exec(__dirname + '/validate -e ' + domainPath + ' ' + problemPath + ' ' + planPath,
-    { timeout: 10000, cwd: cwd },
+  var child = cp.exec('timeout 5 ' + __dirname + '/validate -e ' + domainPath + ' ' + problemPath + ' ' + planPath,
+    { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
-    if (app.is_running(child.pid))
-      app.kill_all(child.pid);
+    //if (app.is_running(child.pid))
+    //  app.kill_all(child.pid);
     whendone({
       'val_status': 'err',
       'error': 'Plan is invalid.',
