@@ -94,7 +94,7 @@ planningapi = function() {
         if (typeof res.result.killed != 'undefined')
           $("#planner_output").html("<pre>Planner Timed Out</pre>");
         else if (typeof res.result.error != 'undefined')
-          $("#planner_output").html(JSON.stringify(res.result.error, null, 3));
+          $("#planner_output").html("<pre>" + JSON.stringify(res.result.error, null, 3) + "</pre>");
         else
           $("#planner_output").html("<pre>" + JSON.stringify(res.result, null, 3) + "</pre>");
       }
