@@ -93,6 +93,8 @@ planningapi = function() {
         progressbar_error();
         if (typeof res.result.killed != 'undefined')
           $("#planner_output").html("<pre>Planner Timed Out</pre>");
+        else if (typeof res.error != 'undefined')
+          $("#planner_output").html(JSON.stringify(res.error, null, 3));
         else
           $("#planner_output").html("<pre>" + JSON.stringify(res.result, null, 3) + "</pre>");
       }

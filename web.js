@@ -4,7 +4,6 @@ var express = require("express")
   , cookieParser = require("cookie-parser")
   , morgan = require("morgan")
   , cp = require('child_process')
-  , pstree = require('ps-tree')
   , memwatch = require('memwatch')
   , http = require('http')
   , fs = require('fs')
@@ -42,27 +41,7 @@ app.get_lock = function() {
   app.lock = true;
   return true;
 };
-
 app.release_lock = function() { app.lock = false; };
-
-// https://github.com/nisaacson/is-running
-// Killing with signal 0 is just a trick to see if the process is still going
-app.is_running = function(pid) {
-  console.log("Checking to see if " + pid + " is still running...");
-  try {
-    return process.kill(pid,0);
-  } catch (e) {
-    return e.code === 'EPERM';
-  }
-};
-
-// https://github.com/indexzero/ps-tree
-app.kill_all = function(pid) {
-  console.log("Killing " + pid + " and children...");
-  pstree(pid, function (error, children) {
-    cp.spawn('kill', ['-9'].concat(children.map(function (p) { return p.PID })));
-  });
-};
 
 var download = function(url, dest, cb) {
   var file = fs.createWriteStream(dest);
@@ -156,30 +135,23 @@ app.solve = function(domainPath, problemPath, cwd, whendone) {
     }
     whendone(error, result);
   };
-  var child = cp.exec(__dirname + '/plan ' + domainPath + ' ' + problemPath + ' ' + planPath
+  cp.exec(__dirname + '/plan ' + domainPath + ' ' + problemPath + ' ' + planPath
        + ' > ' + logPath + ' 2>&1; '
        + 'if [ -f ' + planPath + ' ]; then echo; echo Plan:; cat ' + planPath + '; fi',
        { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
-    //if (app.is_running(child.pid))
-    //  app.kill_all(child.pid);
     if (error)
       whendone(error, null);
     else
       app.parsePlan(domainPath, problemPath, planPath, logPath, cwd, addPathsAndRespond);
   });
-
-  //child.on('exit', function(code) {
-  //});
 };
 
 app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendone) {
-  var child = cp.exec('timeout 5 python ' + __dirname + '/process_solution.py '
+  cp.exec('timeout 5 python ' + __dirname + '/process_solution.py '
        + domainPath + ' ' + problemPath + ' ' + planPath + ' ' + logPath,
        { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
-    //if (app.is_running(child.pid))
-    //  app.kill_all(child.pid);
     if (error)
       whendone(error, null);
     var result = JSON.parse(stdout);
@@ -191,11 +163,9 @@ app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendo
 };
 
 app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
-  var child = cp.exec('timeout 5 ' + __dirname + '/validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
+  cp.exec('timeout 5 ' + __dirname + '/validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
     { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
-    //if (app.is_running(child.pid))
-    //  app.kill_all(child.pid);
     if (error) {
       app.failValidate(domainPath, problemPath, planPath, cwd, whendone);
     } else if (stderr) {
@@ -224,11 +194,9 @@ app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
 };
 
 app.failValidate = function(domainPath, problemPath, planPath, cwd, whendone) {
-  var child = cp.exec('timeout 5 ' + __dirname + '/validate -e ' + domainPath + ' ' + problemPath + ' ' + planPath,
+  cp.exec('timeout 5 ' + __dirname + '/validate -e ' + domainPath + ' ' + problemPath + ' ' + planPath,
     { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
-    //if (app.is_running(child.pid))
-    //  app.kill_all(child.pid);
     whendone({
       'val_status': 'err',
       'error': 'Plan is invalid.',
