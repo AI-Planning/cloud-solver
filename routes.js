@@ -12,14 +12,47 @@ module.exports = function(app) {
     res.render('list.ejs');
   });
 
+  /*****************************************
+   * Uncomment the following for debugging *
+   *****************************************/
+  /*
+  app.get('/startdebug', function(req, res) {
+    app.heap = new app.memwatch.HeapDiff();
+    res.end("Heap recording started...");
+  });
+
+  app.get('/stopdebug', function(req, res) {
+    if (!(app.heap))
+      res.end("Heap recording not yet started...");
+    else {
+      var diff = app.heap.end();
+      res.end(JSON.stringify(diff, null, 3));
+      app.heap = false;
+    }
+  });
+
+  app.get('/psaux', function(req, res) {
+    app.cp.exec('ps aux', { timeout: 5000 }, function (error, stdout, stderr) {
+      res.end(stdout);
+    });
+  });
+  */
+
   app.get('/solve', function(req, res) {
     res.setHeader('Content-Type', 'text/plain');
+
+    // Only allow one solve at a time
+    if (!app.get_lock()) {
+      res.end("Server busy...");
+      return;
+    }
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
       var cleanupAndRespond = function(error, result) {
+        app.release_lock();
         if (error) {
-          res.end(app.errorToText(error))
+          res.end(app.errorToText(error));
         } else {
           res.end(app.resultToText(result));
         }
@@ -44,9 +77,16 @@ module.exports = function(app) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
 
+    // Only allow one solve at a time
+    if (!app.get_lock()) {
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
+      return;
+    }
+
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
       var cleanupAndRespond = function(error, result) {
+        app.release_lock();
         var message = error || result;
         if (error)
           res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
@@ -78,9 +118,16 @@ module.exports = function(app) {
       return;
     }
 
+    // Only allow one solve at a time
+    if (!app.get_lock()) {
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
+      return;
+    }
+
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
       var cleanupAndRespond = function(error, result) {
+        app.release_lock();
         var message = error || result;
         if (error)
           res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
@@ -115,9 +162,16 @@ module.exports = function(app) {
     res.setHeader('Access-Control-Allow-Origin','*');
     res.setHeader('Content-Type', 'application/json');
 
+    // Only allow one solve at a time
+    if (!app.get_lock()) {
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
+      return;
+    }
+
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
       var cleanupAndRespond = function(error, result) {
+        app.release_lock();
         var message = error || result;
         if (error)
           res.end(JSON.stringify({'status':'error', 'result':message}, null, 3));
