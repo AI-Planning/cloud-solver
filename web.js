@@ -3,7 +3,8 @@ var express = require("express")
   , bodyParser = require("body-parser")
   , cookieParser = require("cookie-parser")
   , morgan = require("morgan")
-  , exec = require('child_process').exec
+  , cp = require('child_process')
+  , memwatch = require('memwatch')
   , http = require('http')
   , fs = require('fs')
   , request = require('request')
@@ -28,6 +29,19 @@ app.use(function(req, res, next) {
 app.use(express.static(__dirname + '/client'));
 app.use(bodyParser.json());
 app.use(cookieParser('I am a banana!'));
+
+// Keep around memwatch and cp for debugging purposes
+app.memwatch = memwatch;
+app.cp = cp;
+
+app.lock = false;
+app.get_lock = function() {
+  if (app.lock)
+    return false;
+  app.lock = true;
+  return true;
+};
+app.release_lock = function() { app.lock = false; };
 
 var download = function(url, dest, cb) {
   var file = fs.createWriteStream(dest);
@@ -121,10 +135,10 @@ app.solve = function(domainPath, problemPath, cwd, whendone) {
     }
     whendone(error, result);
   };
-  exec(__dirname + '/plan ' + domainPath + ' ' + problemPath + ' ' + planPath
+  cp.exec(__dirname + '/plan ' + domainPath + ' ' + problemPath + ' ' + planPath
        + ' > ' + logPath + ' 2>&1; '
        + 'if [ -f ' + planPath + ' ]; then echo; echo Plan:; cat ' + planPath + '; fi',
-       { timeout: 10000, cwd: cwd },
+       { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     if (error)
       whendone(error, null);
@@ -134,9 +148,9 @@ app.solve = function(domainPath, problemPath, cwd, whendone) {
 };
 
 app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendone) {
-  exec('python ' + __dirname + '/process_solution.py '
+  cp.exec('timeout 5 python ' + __dirname + '/process_solution.py '
        + domainPath + ' ' + problemPath + ' ' + planPath + ' ' + logPath,
-       { timeout: 5000, cwd: cwd },
+       { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     if (error)
       whendone(error, null);
@@ -149,8 +163,8 @@ app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendo
 };
 
 app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
-  exec(__dirname + '/validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
-    { timeout: 10000, cwd: cwd },
+  cp.exec('timeout 5 ' + __dirname + '/validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
+    { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     if (error) {
       app.failValidate(domainPath, problemPath, planPath, cwd, whendone);
@@ -180,8 +194,8 @@ app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
 };
 
 app.failValidate = function(domainPath, problemPath, planPath, cwd, whendone) {
-  exec(__dirname + '/validate -e ' + domainPath + ' ' + problemPath + ' ' + planPath,
-    { timeout: 10000, cwd: cwd },
+  cp.exec('timeout 5 ' + __dirname + '/validate -e ' + domainPath + ' ' + problemPath + ' ' + planPath,
+    { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     whendone({
       'val_status': 'err',

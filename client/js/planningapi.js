@@ -87,12 +87,14 @@ planningapi = function() {
             items.push("<li>" + val + "</li>");
         });
         $("#solution").html("<ol>" + items.join("") + "</ol>");
-        $("#planner_output").html("<pre>" + $('<div/>').text(res.result.output).html() + "</pre>");
+        $("#planner_output").html("<pre>" + res.result.output.replace("\n", "<br/>") + "</pre>");
 
       } else {
         progressbar_error();
         if (typeof res.result.killed != 'undefined')
           $("#planner_output").html("<pre>Planner Timed Out</pre>");
+        else if (typeof res.result.error != 'undefined')
+          $("#planner_output").html("<pre>" + res.result.error.replace("\n", "<br/>") + "</pre>");
         else
           $("#planner_output").html("<pre>" + JSON.stringify(res.result, null, 3) + "</pre>");
       }
