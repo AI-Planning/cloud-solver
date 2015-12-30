@@ -26,7 +26,7 @@ You can test things by running `heroku open` and then appending the appropriate 
 
 `http://<your project name>.herokuapp.com/solve?domain=http://www.haz.ca/planning-domains/classical/blocks/domain.pddl&problem=http://www.haz.ca/planning-domains/classical/blocks/probBLOCKS-4-1.pddl`
 
-The most simple change -- putting in your own compiled planner -- can be done by modifying the `./plan` file, which is just a bash script that accepts the IPC-style command line (`<planner> <domain> <problem> <output>`).
+The most simple change -- putting in your own compiled planner -- can be done by modifying the `./plan` file, which is just a bash script that accepts the IPC-style command line (`<planner> <domain> <problem> <output>`). This file also controls the time and memory resource limits allotted to the planner.
 
 Most of the magic happens in web.js, routes.js, and process_solution.py. For example, the `app.solve` method in web.js is what invokes the planner, and you can modify the command line string used, the timeout, etc. If you want to run some other planner or type of software, `app.parsePlan` is the method that parses the output. It assumes that properly formatted JSON is sent to the standard output, and all you need to do is replace process_solution.py with your own script to parse any custom output of the planner / software.
 
