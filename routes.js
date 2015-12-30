@@ -12,6 +12,10 @@ module.exports = function(app) {
     res.render('list.ejs');
   });
 
+  /*****************************************
+   * Uncomment the following for debugging *
+   *****************************************/
+  /*
   app.get('/startdebug', function(req, res) {
     app.heap = new app.memwatch.HeapDiff();
     res.end("Heap recording started...");
@@ -32,6 +36,7 @@ module.exports = function(app) {
       res.end(stdout);
     });
   });
+  */
 
   app.get('/solve', function(req, res) {
     res.setHeader('Content-Type', 'text/plain');
