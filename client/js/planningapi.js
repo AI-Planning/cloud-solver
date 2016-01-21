@@ -74,7 +74,7 @@ planningapi = function() {
                                    "is_url": true
                     })
     }).done(function (res) {
-      console.log("Server responce:")
+      console.log("Server responce:");
       console.log(res);
       if (res['status'] === 'ok') {
         progressbar_success();
@@ -138,7 +138,7 @@ planningapi = function() {
     $("#dom_desc").html(domains[dom_index].description);
 
     $.getJSON(API_URL + "problems/" + domains[dom_index].domain_id, function(data) {
-      data.result.sort(function(a,b) { return a.problem.toLowerCase() > b.problem.toLowerCase(); })
+      data.result.sort(function(a,b) { return a.problem.toLowerCase() > b.problem.toLowerCase(); });
       problems = data.result;
       var items = [];
       $.each(problems, function(index, val) {
@@ -164,7 +164,7 @@ planningapi = function() {
 
   function _init() {
     $.getJSON(API_URL + "collections", function(data) {
-      data.result.sort(function(a,b) { return a.collection_name.toLowerCase() > b.collection_name.toLowerCase(); })
+      data.result.sort(function(a,b) { return a.collection_name.toLowerCase() > b.collection_name.toLowerCase(); });
       collections = data.result;
       var items = ["<option value=\"-1\" selected>All domains</option>"];
       $.each(collections, function(index, val) {
