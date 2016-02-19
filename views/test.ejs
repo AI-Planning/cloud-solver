@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Solver Testing</title>
+    <link href='//fonts.googleapis.com/css?family=Vollkorn:400italic,400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/test.css">
+    <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="js/test.js"></script>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4">
+            <h1>Solver Testing</h1>
+
+            <p>Click <a href="/solve?domain=http://www.haz.ca/planning-domains/classical/blocks/domain.pddl&problem=http://www.haz.ca/planning-domains/classical/blocks/probBLOCKS-4-1.pddl">here</a> to make sure the <code>GET</code> request is working. For the remaining tests, hit the big "Go!" button to check the coverage of the planner included.</p>
+
+        </div>
+
+        <div id="auto-tests" class="col-md-8">
+
+            <button id="go-button" onclick="run_tests()" type="button" class="btn btn-primary">Go!</button>
+            <br /><br />
+
+            <ul>
+                <li id="test1">Solve problem <a href="http://api.planning.domains/json/classical/problem/8">8</a> ...</li>
+                <li id="test2">Solve problem <a href="http://api.planning.domains/json/classical/problem/2352">2352</a> ...</li>
+                <li id="test3">Solve problem <a href="http://api.planning.domains/json/classical/problem/1809">1809</a> ...</li>
+                <li id="test4">Solve problem <a href="http://api.planning.domains/json/classical/problem/2703">2703</a> ...</li>
+                <li id="test5">Solve problem <a href="http://api.planning.domains/json/classical/problem/1116">1116</a> ...</li>
+                <li id="test6">Solve problem <a href="http://api.planning.domains/json/classical/problem/4399">4399</a> ...</li>
+                <li id="test7">Solve problem <a href="http://api.planning.domains/json/classical/problem/211">211</a> ...</li>
+                <li id="test8">Solve problem <a href="http://api.planning.domains/json/classical/problem/4436">4436</a> ...</li>
+                <li id="test9">Solve problem <a href="http://api.planning.domains/json/classical/problem/818">818</a> ...</li>
+                <li id="test10">Solve problem <a href="http://api.planning.domains/json/classical/problem/2487">2487</a> ...</li>
+            </ul>
+
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
