@@ -34,14 +34,6 @@ function solve_and_validate(pid, cb) {
     query('solve-and-validate', {probID:pid}, cb);
 }
 
-function solve(pid, cb) {
-    query('solve', {probID:pid}, cb);
-}
-
-function validate(pid, cb) {
-
-}
-
 function query(qs, params, cb) {
     var SOLVER_URL = '/';
 
