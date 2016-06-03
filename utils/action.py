@@ -7,7 +7,7 @@ class Action (object):
 
         Attributes:
             name: the action name (string)
-            
+
             parameters: list of tuples that contain a pair of strings:
                 1) the variable name
                 2) the variable type
@@ -15,7 +15,7 @@ class Action (object):
             precondition: formula object
 
             observe: predicate object (or None if the action is not a sensing action)
-            
+
             effect: formula object
 
         Methods:
@@ -28,7 +28,7 @@ class Action (object):
 
             Inputs:
                 name: the action name (string)
-                
+
                 parameters: list of tuples that contain a pair of strings:
                     1) the variable name
                     2) the variable type
@@ -37,7 +37,7 @@ class Action (object):
                     #TODO some actions have no precondition, set this to None
 
                 observe: predicate object (or None if the action is not a sensing action)
-                
+
                 effect: formula object
                     #TODO some actions have no effects, set this to None
         """
@@ -95,11 +95,11 @@ class Action (object):
         """Print back the action in PDDL form."""
 
         o = [] # output, which is a list of lines
+        param_mapping = {}
         prefix = sp * lvl
         o.append (prefix +  "(:action %s" % self.name)
 
         if grounding:
-            param_mapping = {}
             for i in range(len(grounding)):
                 param_mapping[self.parameters[i][0]] = grounding[i]
             param_s = " ".join(grounding)
