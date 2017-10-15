@@ -29,7 +29,7 @@
     "express-method-override": "0.0.3",
     "memwatch-next": "^0.3.0",
     "morgan": "^1.8.2",
-    "request": "^2.81.0",
+    "request": "2.81.0",
     "tmp": "0.0.27"
   }
 }
