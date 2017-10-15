@@ -11,7 +11,7 @@ module.exports = function(app) {
   app.get('/list', function(req, res) {
     res.render('list.ejs');
   });
-  
+
   app.get('/test', function(req, res) {
     res.render('test.ejs');
   });
@@ -50,6 +50,8 @@ module.exports = function(app) {
       res.end("Server busy...");
       return;
     }
+
+    app.server_use(req);
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {

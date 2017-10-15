@@ -30,9 +30,17 @@ app.use(express.static(__dirname + '/client'));
 app.use(bodyParser.json());
 app.use(cookieParser('I am a banana!'));
 
-// Data structures for throttling
+// Data structures and functions for throttling
 app.last_requests = {};
 app.current_caller = "";
+
+app.server_use = function(req) {
+    var ip = req.headers['x-forwarded-for'] ||
+     req.connection.remoteAddress ||
+     req.socket.remoteAddress ||
+     req.connection.socket.remoteAddress;
+    console.log("IP: " + ip);
+};
 
 // Keep around memwatch and cp for debugging purposes
 app.memwatch = memwatch;
