@@ -22,14 +22,14 @@
     "node": "0.10.29"
   },
   "dependencies": {
-    "body-parser": "^1.14.2",
-    "cookie-parser": "^1.4.0",
-    "ejs": "^2.3.4",
-    "express": "^4.13.3",
+    "body-parser": "^1.17.2",
+    "cookie-parser": "^1.4.3",
+    "ejs": "^2.5.7",
+    "express": "^4.15.4",
     "express-method-override": "0.0.3",
-    "memwatch": "^0.2.2",
-    "morgan": "^1.6.1",
-    "request": "^2.60.0",
-    "tmp": "0.0.26"
+    "memwatch-next": "^0.3.0",
+    "morgan": "^1.8.2",
+    "request": "2.81.0",
+    "tmp": "0.0.27"
   }
 }
