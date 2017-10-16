@@ -34,12 +34,33 @@ app.use(cookieParser('I am a banana!'));
 app.last_requests = {};
 app.current_caller = "";
 
+app.get_ip = function(req) {
+    return req.headers['x-forwarded-for'] ||
+           req.connection.remoteAddress ||
+           req.socket.remoteAddress ||
+           req.connection.socket.remoteAddress;
+};
+
 app.server_use = function(req) {
-    var ip = req.headers['x-forwarded-for'] ||
-     req.connection.remoteAddress ||
-     req.socket.remoteAddress ||
-     req.connection.socket.remoteAddress;
-    console.log("IP: " + ip);
+    // Extract the IP as a marker of who is using the service
+    var ip = app.get_ip(req);
+
+    // Mark the current caller
+    app.current_caller = ip;
+};
+
+app.check_for_throttle = function(req) {
+    // Extract the IP as a marker of who is using the service
+    var ip = app.get_ip(req);
+
+    // Only throttle if it has been less than 20 seconds since the last contentious
+    //  server busy call.
+    return (ip in app.last_requests) && ((Date.now() - app.last_requests[ip]) < 20000);
+};
+
+app.server_in_contention = function() {
+    // Mark the currently running source as having a last request for throttling
+    app.last_requests[app.current_caller] = Date.now();
 };
 
 // Keep around memwatch and cp for debugging purposes

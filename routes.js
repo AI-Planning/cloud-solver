@@ -46,7 +46,11 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'text/plain');
 
     // Only allow one solve at a time
-    if (!app.get_lock()) {
+    if (app.check_for_throttle(req)) {
+      res.end("Server busy...");
+      return;
+    } else if (!app.get_lock()) {
+      app.server_in_contention();
       res.end("Server busy...");
       return;
     }
