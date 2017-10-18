@@ -92,10 +92,18 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'application/json');
 
     // Only allow one solve at a time
-    if (!app.get_lock()) {
+    if (app.check_for_throttle(req)) {
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
+      return;
+    } else if (!app.get_lock()) {
+      app.server_in_contention();
       res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
       return;
     }
+
+    console.log("Going ahead with a POST solve...");
+
+    app.server_use(req);
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
