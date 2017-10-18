@@ -47,11 +47,16 @@ app.server_use = function(req) {
 
     // Mark the current caller
     app.current_caller = ip;
+
+    console.log("Current user: " + ip);
 };
 
 app.check_for_throttle = function(req) {
     // Extract the IP as a marker of who is using the service
     var ip = app.get_ip(req);
+
+    console.log("Checking for throttle for: " + ip);
+    console.log("Answer: " + ((ip in app.last_requests) && ((Date.now() - app.last_requests[ip]) < 20000)));
 
     // Only throttle if it has been less than 20 seconds since the last contentious
     //  server busy call.
@@ -61,6 +66,7 @@ app.check_for_throttle = function(req) {
 app.server_in_contention = function() {
     // Mark the currently running source as having a last request for throttling
     app.last_requests[app.current_caller] = Date.now();
+    console.log("Setting " + app.current_caller + " to have a last request time of " + Date.now());
 };
 
 // Keep around memwatch and cp for debugging purposes
