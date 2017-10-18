@@ -45,6 +45,8 @@ module.exports = function(app) {
   app.get('/solve', function(req, res) {
     res.setHeader('Content-Type', 'text/plain');
 
+    console.log("In the GET...");
+
     // Only allow one solve at a time
     if (app.check_for_throttle(req)) {
       res.end("Server busy...");
