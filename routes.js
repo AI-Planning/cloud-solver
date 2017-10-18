@@ -55,6 +55,8 @@ module.exports = function(app) {
       return;
     }
 
+    console.log("Going ahead with a GET solve...");
+
     app.server_use(req);
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
