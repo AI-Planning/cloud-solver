@@ -11,7 +11,7 @@ module.exports = function(app) {
   app.get('/list', function(req, res) {
     res.render('list.ejs');
   });
-  
+
   app.get('/test', function(req, res) {
     res.render('test.ejs');
   });
@@ -46,10 +46,16 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'text/plain');
 
     // Only allow one solve at a time
-    if (!app.get_lock()) {
+    if (app.check_for_throttle(req)) {
+      res.end("Server busy...");
+      return;
+    } else if (!app.get_lock()) {
+      app.server_in_contention();
       res.end("Server busy...");
       return;
     }
+
+    app.server_use(req);
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
@@ -82,10 +88,16 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'application/json');
 
     // Only allow one solve at a time
-    if (!app.get_lock()) {
+    if (app.check_for_throttle(req)) {
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
+      return;
+    } else if (!app.get_lock()) {
+      app.server_in_contention();
       res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
       return;
     }
+
+    app.server_use(req);
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
@@ -123,10 +135,16 @@ module.exports = function(app) {
     }
 
     // Only allow one solve at a time
-    if (!app.get_lock()) {
+    if (app.check_for_throttle(req)) {
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
+      return;
+    } else if (!app.get_lock()) {
+      app.server_in_contention();
       res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
       return;
     }
+
+    app.server_use(req);
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
@@ -167,10 +185,16 @@ module.exports = function(app) {
     res.setHeader('Content-Type', 'application/json');
 
     // Only allow one solve at a time
-    if (!app.get_lock()) {
+    if (app.check_for_throttle(req)) {
+      res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
+      return;
+    } else if (!app.get_lock()) {
+      app.server_in_contention();
       res.end(JSON.stringify({ 'status': 'error', 'result': "Server busy..." }, null, 3));
       return;
     }
+
+    app.server_use(req);
 
     tmp.dir({prefix: 'solver_planning_domains_tmp_', unsafeCleanup: true},
     function _tempDirCreated(dirErr, path, cleanupCallback) {
