@@ -12,7 +12,7 @@ This project should get you from zero to having your own hosted planner in the c
 1. Head over to http://heroku.com and get yourself an account.
 2. Install the [[heroku toolbelt](https://toolbelt.heroku.com)] which will allow you to deploy new applications.
 3. Login using your credentials from step 1.
-4. Clone this project (if you haven't already) and navigate to it: `git clone https://bitbucket.org/planning-researchers/cloud-solver.git; cd solver`
+4. Clone this project (if you haven't already) and navigate to it: `git clone https://bitbucket.org/planning-researchers/cloud-solver.git; cd cloud-solver`
 5. Run `heroku create` from the directory this file exists. Take note of the URL.
 6. Run `git push heroku master` to deploy the software.
 
