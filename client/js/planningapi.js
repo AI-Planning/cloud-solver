@@ -135,7 +135,7 @@ planningapi = function() {
     $("#problems").html("");
 
     var dom_index = $("#domains option:selected").val();
-    $("#dom_desc").html(domains[dom_index].description);
+    $("#dom_desc").html(domains[dom_index].description.replace(/\n/g, '<br>'));
 
     $.getJSON(API_URL + "problems/" + domains[dom_index].domain_id, function(data) {
       data.result.sort(function(a,b) { return a.problem.toLowerCase() > b.problem.toLowerCase(); });
