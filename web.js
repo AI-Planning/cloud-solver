@@ -4,7 +4,6 @@ var express = require("express")
   , cookieParser = require("cookie-parser")
   , morgan = require("morgan")
   , cp = require('child_process')
-  , memwatch = require('memwatch-next')
   , http = require('http')
   , fs = require('fs')
   , request = require('request')
@@ -64,7 +63,7 @@ app.server_in_contention = function() {
 };
 
 // Keep around memwatch and cp for debugging purposes
-app.memwatch = memwatch;
+//app.memwatch = memwatch;
 app.cp = cp;
 
 app.lock = false;

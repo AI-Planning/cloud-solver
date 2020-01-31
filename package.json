@@ -27,7 +27,6 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-method-override": "0.0.3",
-    "memwatch-next": "^0.3.0",
     "morgan": "^1.9.1",
     "request": "2.88.0",
     "tmp": "0.1.0"
