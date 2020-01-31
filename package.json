@@ -19,17 +19,17 @@
   "author": "Christian Muise",
   "license": "GPLv3",
   "engines": {
-    "node": "0.10.29"
+    "node": "12.14.1"
   },
   "dependencies": {
-    "body-parser": "^1.17.2",
-    "cookie-parser": "^1.4.3",
-    "ejs": "^2.5.7",
-    "express": "^4.15.4",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.4",
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
     "express-method-override": "0.0.3",
     "memwatch-next": "^0.3.0",
-    "morgan": "^1.8.2",
-    "request": "2.81.0",
-    "tmp": "0.0.27"
+    "morgan": "^1.9.1",
+    "request": "2.88.0",
+    "tmp": "0.1.0"
   }
 }
