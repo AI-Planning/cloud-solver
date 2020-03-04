@@ -1,3 +1,4 @@
+from __future__ import print_function
 # my utility function
 from utils import get_contents
 
@@ -75,7 +76,7 @@ class PDDL_Tree (object):
     def print_tree (self, lvl=0):
         """Print the entire tree to the console."""
 
-        print PDDL_Tree.TAB * lvl + str(self.name)
+        print(PDDL_Tree.TAB * lvl + str(self.name))
         
         for child in self.children:
             child.print_tree(lvl + 1)

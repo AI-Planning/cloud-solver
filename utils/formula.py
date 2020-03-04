@@ -1,4 +1,4 @@
-
+from __future__ import print_function
 from predicate import Predicate
 
 
@@ -60,19 +60,19 @@ class Formula(object):
             "comparison must be between formulas, found %s" % str (type(f))
 
         #if self.name != f.name:
-        #    print "names different"
-        #    print self.name
-        #    print f.name
+        #    print("names different")
+        #    print(self.name)
+        #    print(f.name)
         #if not all ([sa == fa for sa, fa in zip (self.args, f.args)]):
         #    diff_args = filter (lambda i: i[0] != i[1], \
         #            zip (self.args, f.args))
-        #    print "args different"
-        #    print "*self*"
-        #    print self.args
-        #    print "*f*"
-        #    print f.args
-        #    print "**diff **"
-        #    print [str(sa) + "\n" + str (fa) for sa, fa in diff_args]
+        #    print("args different")
+        #    print("*self*")
+        #    print(self.args)
+        #    print("*f*")
+        #    print(f.args)
+        #    print("**diff **")
+        #    print([str(sa) + "\n" + str (fa) for sa, fa in diff_args])
         return (self.name == f.name) and \
                len(self.args) == len(f.args) and \
                all ([sa == fa for sa, fa in zip (self.args, f.args)])
@@ -435,8 +435,8 @@ class Primitive(Formula):
         self.predicate.args = None
         if hash (self.predicate) not in fluent_dict:
             for p in sorted (fluent_dict.values()):
-                print p
-            print "Did not find %s" % str(self.predicate)
+                print(p)
+            print("Did not find %s" % str(self.predicate))
         self.predicate = fluent_dict[hash(self.predicate)]
 
     def __eq__ (self, f):
