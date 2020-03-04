@@ -234,8 +234,8 @@ class And(Formula):
             Inputs:
                 args:    list of formula objects
         """
-        args = filter(lambda x: not isinstance(x, And), args) + \
-               [item for andarg in filter(lambda x: isinstance(x, And), args) for item in andarg.args]
+        args = list(filter(lambda x: not isinstance(x, And), args)) + \
+               [item for andarg in list(filter(lambda x: isinstance(x, And), args)) for item in andarg.args]
 
         super(And, self).__init__("and", args)
 

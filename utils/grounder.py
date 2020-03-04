@@ -149,7 +149,7 @@ class GroundProblem(Problem):
 
         # types
         #TODO likely wrong, doesn't capture the type hierarchy
-        s = " ".join (filter(lambda t: t!= Predicate.OBJECT, self.types))
+        s = " ".join (list(filter(lambda t: t!= Predicate.OBJECT, self.types)))
         fp.write (sp + "(:types %s)%s" %(s, "\n"))
 
         # fluents (ground predicates)
@@ -404,7 +404,7 @@ class GroundProblem(Problem):
             "Fluents": self.fluents
         }
 
-        for k, v in d.iteritems():
+        for k, v in d.items():
             print("*** %s ***" % k)
             if k == "Operators":
                 for op in self.operators:

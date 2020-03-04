@@ -127,7 +127,7 @@ class Problem(object):
 
         # types
         #TODO likely wrong, doesn't capture the type hierarchy
-        s = " ".join (filter(lambda t: t!= Predicate.OBJECT, self.types))
+        s = " ".join (list(filter(lambda t: t!= Predicate.OBJECT, self.types)))
         fp.write (sp + "(:types %s)%s" %(s, "\n"))
 
         # predicates
@@ -215,12 +215,12 @@ class Problem(object):
         d["Obj -> Type Mapping"] = self.obj_to_type
         #d["Type -> Obj Mapping"] = self.type_to_obj
 
-        for k, v in d.iteritems():
+        for k, v in d.items():
             print("*** %s ***" % k)
             if isinstance(v, dict):
                 if len(v) == 0:
                     print("\t<no items>")
-                for k, val in v.iteritems():
+                for k, val in v.items():
                     print("\t%s -> %s" % (k, str(val)))
             elif hasattr(v, '__iter__'):
                 if len(v) == 0:
@@ -283,7 +283,7 @@ class Problem(object):
                 self.parent_types[Predicate.OBJECT] = None
                 self.types.add(Predicate.OBJECT)
                 self.type_to_obj[Predicate.OBJECT] = set([])
-                for obj, type_list in self.obj_to_type.iteritems():
+                for obj, type_list in self.obj_to_type.items():
                     type_list.add(Predicate.OBJECT)
                     self.type_to_obj[Predicate.OBJECT].add(obj)
 
