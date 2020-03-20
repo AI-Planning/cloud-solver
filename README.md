@@ -1,7 +1,7 @@
 PDDL Solver (in the cloud!)
 ==========================
 
-This project is the bases for [solver.planning.domains](http://solver.planning.domains/) -- a web service that provides access to an automated planner. Please report any bugs or feature requests you may have on the [[issue list](https://bitbucket.org/planning-researchers/cloud-solver/issues)] for the project.
+This project is the bases for [solver.planning.domains](http://solver.planning.domains/) -- a web service that provides access to an automated planner. Please report any bugs or feature requests you may have on the [[issue list](https://github.com/AI-Planning/cloud-solver/issues)] for the project.
 
 
 Deploying your own solver
@@ -12,7 +12,7 @@ This project should get you from zero to having your own hosted planner in the c
 1. Head over to http://heroku.com and get yourself an account.
 2. Install the [[heroku toolbelt](https://toolbelt.heroku.com)] which will allow you to deploy new applications.
 3. Login using your credentials from step 1.
-4. Clone this project (if you haven't already) and navigate to it: `git clone https://bitbucket.org/planning-researchers/cloud-solver.git; cd cloud-solver`
+4. Clone this project (if you haven't already) and navigate to it: `git clone https://github.com/AI-Planning/cloud-solver.git; cd cloud-solver`
 5. Run `heroku create` from the directory this file exists. Take note of the URL.
 6. Run `git push heroku master` to deploy the software.
 
