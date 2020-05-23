@@ -1,6 +1,6 @@
 from __future__ import print_function
-from formula import Formula
-from predicate import Predicate
+from .formula import Formula
+from .predicate import Predicate
 
 class Action (object):
     """

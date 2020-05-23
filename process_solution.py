@@ -1,4 +1,4 @@
-
+from __future__ import print_function
 import sys, json, os
 
 from utils.parser import Problem
@@ -44,13 +44,13 @@ def doit(domain, problem, solution, outfile):
         file = open(outfile, 'r')
         solver_output = file.read()
         file.close()
-    except Exception, e:
+    except Exception as e:
         return json.dumps({'parse_status': 'err', 'output': solver_output,
                            'error': "Failed to read solver output -- %s" % str(e)})
 
     try:
         task = Problem(domain, problem)
-    except Exception, e:
+    except Exception as e:
         return json.dumps({'parse_status': 'err', 'output': solver_output,
                            'error': "Failed to parse the problem -- %s\n\n%s" % (str(e), solver_output)})
 
@@ -61,7 +61,7 @@ def doit(domain, problem, solution, outfile):
                                'error': "Solver failed.\n\n%s" % solver_output})
 
         file = open(solution, 'r')
-        plan = map(lambda x: x.strip().lower(), file.readlines())
+        plan = list(map(lambda x: x.strip().lower(), file.readlines()))
         file.close()
 
         if (len(plan) == 0) or (len(plan) == 1 and plan[0] == ''):
@@ -71,13 +71,13 @@ def doit(domain, problem, solution, outfile):
         if '' == plan[-1]:
             plan = plan[:-1]
 
-    except Exception, e:
+    except Exception as e:
         return json.dumps({'parse_status': 'err', 'output': solver_output,
                            'error': "Failed to parse plan -- %s\n\n%s" % (str(e), solver_output)})
 
     try:
         return getActionDetails(task, plan, solver_output)
-    except Exception, e:
+    except Exception as e:
         return getSimplePlan(task, plan, str(e), solver_output)
 
 if __name__ == '__main__':
@@ -87,5 +87,5 @@ if __name__ == '__main__':
     solution = sys.argv[3]
     solverout = sys.argv[4]
 
-    print doit(domain, problem, solution, solverout)
+    print(doit(domain, problem, solution, solverout))
 

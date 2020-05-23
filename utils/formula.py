@@ -1,5 +1,5 @@
 from __future__ import print_function
-from predicate import Predicate
+from .predicate import Predicate
 
 
 class Formula(object):

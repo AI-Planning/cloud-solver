@@ -1,16 +1,16 @@
 from __future__ import print_function
-from parser import Problem
-from action import Action
-from formula import Primitive, Forall, When, And
-from predicate import Predicate
+from .parser import Problem
+from .action import Action
+from .formula import Primitive, Forall, When, And
+from .predicate import Predicate
 import itertools
 
 
 class GroundProblem(Problem):
     """
     Inherits from Problem.
-    Houses the basic data structures for a contingent planning problem that has 
-    been grounded. It will contain all of the attributes and functionality of the 
+    Houses the basic data structures for a contingent planning problem that has
+    been grounded. It will contain all of the attributes and functionality of the
     parent class, Problem.
 
     Inputs:
@@ -128,7 +128,7 @@ class GroundProblem(Problem):
         if self.types != p.types or self.parent_types != p.parent_types:
             print("types")
             return False
-        
+
         return True
 
 
@@ -234,7 +234,7 @@ class GroundProblem(Problem):
         """
 
         d = self._create_param_dict(params)
-        
+
         #if action is not None and action.effect is not None:
             # query the effect for any forall conditionals
             #self._get_unassigned_vars(action.effect, d)
@@ -289,7 +289,7 @@ class GroundProblem(Problem):
         if isinstance(formula, Primitive):
             return Primitive(self._predicate_to_fluent(formula.predicate, assignment, fluent_dict))
         elif isinstance(formula, Forall):
-            
+
             new_conjuncts = []
             var_names, val_generator = self._create_valuations(formula.params)
             for valuation in val_generator:
@@ -298,7 +298,7 @@ class GroundProblem(Problem):
                     new_assignment[k] = assignment[k]
                 new_conjuncts.append(self._partial_ground_formula(formula.args[0], new_assignment, fluent_dict))
             return And(new_conjuncts)
-            
+
         elif isinstance(formula, When):
             return When(self._partial_ground_formula(formula.condition, assignment, fluent_dict),
                         self._partial_ground_formula(formula.result, assignment, fluent_dict))
@@ -330,7 +330,7 @@ class GroundProblem(Problem):
         self.operators = set([])
 
         for a in self.actions:
-            
+
             var_names, val_generator = self._create_valuations(a.parameters, a)
 
             for valuation in val_generator:
@@ -423,8 +423,8 @@ class Operator(Action):
     Data structure to contain ground action from the problem.
 
     Attributes:
-        The attributes should be exactly the same as for an Action object, with 
-        the exception that every instance of a Predicate object is actually a 
+        The attributes should be exactly the same as for an Action object, with
+        the exception that every instance of a Predicate object is actually a
         Fluent object (i.e., everything is assumed to be ground).
 
     Methods:
