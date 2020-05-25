@@ -1,11 +1,11 @@
 from __future__ import print_function
 # my utility function
-from utils import get_contents
+from .utils import get_contents
 
 # related classes
-from predicate import Predicate
-from formula import *
-from action import Action
+from .predicate import Predicate
+from .formula import *
+from .action import Action
 
 # from stdlib
 import re
@@ -26,7 +26,7 @@ class PDDL_Tree (object):
 
         self.name = name
         self.children = []
-        
+
     def __getitem__ (self, k):
         """
             Allow retrieval of children based on name.
@@ -65,30 +65,30 @@ class PDDL_Tree (object):
 
     def add_child (self, child):
         """Add the given child to the end of the list of children."""
-        
+
         self.children.append(child)
 
     def dump (self):
         """Informative representation."""
 
         return self.print_tree ()
-        
+
     def print_tree (self, lvl=0):
         """Print the entire tree to the console."""
 
         print(PDDL_Tree.TAB * lvl + str(self.name))
-        
+
         for child in self.children:
             child.print_tree(lvl + 1)
 
     def has_children (self):
         """Return True iff this node has children. """
-        
+
         return len(self.children) == 0
 
     def is_leaf (self):
         """ Return True iff this node is a leaf. """
-        
+
         return not self.has_children()
 
     def is_empty (self):
@@ -136,9 +136,9 @@ class PDDL_Tree (object):
             Make a tree out of a PDDL list.
             Meant to be called internally
         """
-        
+
         root = PDDL_Tree (pddl_list[0])
-        
+
         for child in pddl_list[1:]:
             if isinstance (child, list):
                 if len (child) == 0:
@@ -148,7 +148,7 @@ class PDDL_Tree (object):
                     root.add_child(subtree)
             else:
                 root.add_child (PDDL_Tree (child))
-                
+
         return root
 
     @staticmethod

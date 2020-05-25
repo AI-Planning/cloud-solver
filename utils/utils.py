@@ -1,7 +1,7 @@
 # helper classes
-from action import Action
-from predicate import Predicate
-from formula import *
+from .action import Action
+from .predicate import Predicate
+from .formula import *
 
 """
     General purpose utilities
@@ -14,7 +14,7 @@ def get_contents (fname):
         Return the contents of the given file.
         Strip comments (lines starting with ;)
     """
-    
+
     fp = open (fname, "r")
     contents = fp.read().lower()
     fp.close()

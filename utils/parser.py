@@ -1,10 +1,10 @@
 from __future__ import print_function
 from collections import OrderedDict
-from formula import Formula, And, Primitive, Forall, When, Xor, Not, Oneof, Or
-from action import Action
-from predicate import Predicate
-from pddl_tree import PDDL_Tree
-from utils import PDDL_Utils
+from .formula import Formula, And, Primitive, Forall, When, Xor, Not, Oneof, Or
+from .action import Action
+from .predicate import Predicate
+from .pddl_tree import PDDL_Tree
+from .utils import PDDL_Utils
 
 
 class Problem(object):
