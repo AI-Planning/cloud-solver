@@ -18,6 +18,18 @@ This project should get you from zero to having your own hosted planner in the c
 
 Et voila! You now have your very own planner-in-the-cloud.
 
+Adding Dependencies
+-------------------
+If you need to install dependencies such as libboost, you should:
+1. Run `heroku buildpacks:add --index 1 heroku-community/apt`
+2. Create a file called `Aptfile`, and enter the dependencies. For example:
+```
+libboost-python-dev
+libboost-program-options-dev
+```
+3. Run `git add Aptfile`
+4. Run `git commit -am 'added apt dependencies'`
+5. Run `git push heroku master` to deploy the dependencies.
 
 Playing with things
 -------------------
