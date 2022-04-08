@@ -256,6 +256,8 @@ class Problem(object):
                 self.parent_types = {subtype: parent for subtype, parent in type_hierarchy}
                 self.types = set(parse_tree[":types"].named_children())
                 self.types.discard("-")
+                for t in self.parent_types:
+                    assert t != self.parent_types[t], "Type %s is its own parent. Type hierarchy = %s" % (str(t), str(self.parent_types))
             else:
                 self.types = set(parse_tree[":types"].named_children())
                 self.parent_types = {t: None for t in self.types}
