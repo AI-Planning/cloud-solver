@@ -1,14 +1,38 @@
 
+/*************************/
+/**                     **/
+/** Added for solver.PD **/
+/**                     **/
+/*************************/
+require('newrelic');
+
 var express = require("express")
   , bodyParser = require("body-parser")
   , cookieParser = require("cookie-parser")
   , morgan = require("morgan")
   , cp = require('child_process')
+  , memwatch = require('memwatch-next')
   , http = require('http')
   , fs = require('fs')
   , request = require('request')
   , app = express()
   , port = Number(process.env.PORT || 5000);
+
+
+
+
+/*************************/
+/**                     **/
+/** Added for solver.PD **/
+/**                     **/
+/*************************/
+var dbConfig = require('./config/database.js');
+var knex = require('knex')(dbConfig);
+var bookshelf = require('bookshelf')(knex);
+app.set('bookshelf', bookshelf);
+app.set('lastdomain', 'None');
+app.set('lastproblem', 'None');
+
 
 
 app.use(function(req, res, next) {
@@ -26,7 +50,8 @@ app.use(function(req, res, next) {
 });
 
 app.use(express.static(__dirname + '/client'));
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: '5mb'}));
+app.use(bodyParser.urlencoded({ extended: true, limit: '5mb' }));
 app.use(cookieParser('I am a banana!'));
 
 // Data structures and functions for throttling
@@ -49,6 +74,14 @@ app.server_use = function(req) {
 };
 
 app.check_for_throttle = function(req) {
+    // In rare cases (e.g., with a /solve GET request that's malformed), the server
+    //  can go into a weird state where the lock isn't released. This fixes that.
+    //  It may cause the server to become overloaded if the process is truely still
+    //  going, but that's better than a permanent app lock.
+    if ((app.current_caller in app.last_requests) &&
+        ((Date.now() - app.last_requests[app.current_caller]) >= 60000))
+        app.release_lock();
+
     // Extract the IP as a marker of who is using the service
     var ip = app.get_ip(req);
 
@@ -63,7 +96,7 @@ app.server_in_contention = function() {
 };
 
 // Keep around memwatch and cp for debugging purposes
-//app.memwatch = memwatch;
+app.memwatch = memwatch;
 app.cp = cp;
 
 app.lock = false;
@@ -167,11 +200,33 @@ app.solve = function(domainPath, problemPath, cwd, whendone) {
     }
     whendone(error, result);
   };
+
+  var t = new Date().getTime();
+
+  fs.readFile(domainPath, 'utf8', function (err,data) {
+    if (err)
+      console.log(err);
+    else
+      app.lastdomain = data;
+  });
+  fs.readFile(problemPath, 'utf8', function (err,data) {
+    if (err)
+      console.log(err);
+    else
+      app.lastproblem = data;
+  });
+
   cp.exec(__dirname + '/plan ' + domainPath + ' ' + problemPath + ' ' + planPath
        + ' > ' + logPath + ' 2>&1; '
        + 'if [ -f ' + planPath + ' ]; then echo; echo Plan:; cat ' + planPath + '; fi',
        { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
+
+    t = ((new Date().getTime()) - t) / 1000;
+    var bookshelf = app.get('bookshelf');
+    var Entry = bookshelf.Model.extend({tableName: 'Calls'});
+    Entry.forge({type:'solve', time: t, extra: '', date: new Date()}).save().then(console.log('Solving saved...'));
+
     if (error)
       whendone(error, null);
     else
@@ -186,7 +241,26 @@ app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendo
   function _processStopped(error, stdout, stderr) {
     if (error)
       whendone(error, null);
-    var result = JSON.parse(stdout);
+
+    try {
+
+      var result = JSON.parse(stdout);
+
+    } catch (error) {
+      console.log("Error parsing output:");
+      console.log("<error>");
+      console.log(error);
+      console.log("</error>");
+      console.log("<stdout>");
+      console.log(stdout);
+      console.log("</stdout>");
+      console.log("<stderr>");
+      console.log(stderr);
+      console.log("</stderr>");
+      whendone("Error parsing the json output (if problem persists, please email solver admin).", null);
+      return;
+    }
+
     if (result.parse_status === 'err')
       whendone(result, null);
     else
@@ -195,7 +269,7 @@ app.parsePlan = function(domainPath, problemPath, planPath, logPath, cwd, whendo
 };
 
 app.validate = function(domainPath, problemPath, planPath, cwd, whendone) {
-  cp.exec('timeout 5 ' + __dirname + '/validate -S ' + domainPath + ' ' + problemPath + ' ' + planPath,
+  cp.exec(__dirname + '/validate ' + domainPath + ' ' + problemPath + ' ' + planPath,
     { cwd: cwd },
   function _processStopped(error, stdout, stderr) {
     if (error) {
