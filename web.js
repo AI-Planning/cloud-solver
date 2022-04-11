@@ -4,7 +4,6 @@
 /** Added for solver.PD **/
 /**                     **/
 /*************************/
-require('newrelic');
 
 var express = require("express")
   , bodyParser = require("body-parser")
